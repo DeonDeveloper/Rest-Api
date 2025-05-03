@@ -4,13 +4,12 @@ const fetch = require('node-fetch');
 const mooCountry = (value) => {
   const regionMap = {
     AF: 'Afganistan 🇦🇫',
-    AX: 'Kepulauan Aland 🇦🇽',
     AL: 'Albania 🇦🇱',
-    // Daftar negara lainnya...
+    DZ: 'Aljazair 🇩🇿',
     ID: 'Indonesia 🇮🇩',
     MY: 'Malaysia 🇲🇾',
     SG: 'Singapura 🇸🇬',
-    // Daftar negara lainnya...
+    // Daftar negara lainnya sesuai kebutuhan...
   };
 
   // Mengembalikan nama region dengan bendera jika ditemukan, atau 'Tidak diketahui' jika tidak
@@ -65,10 +64,10 @@ module.exports = function(app) {
       const result = await validateMobileLegendsGopay(userId, zoneId);
 
       // Mendapatkan data username dan negara dari response
-      const data = result?.result?.data || {};
+      const data = result.data;
       const username = data.username || 'Tidak ditemukan';
-      const countryCode = (data.countryOrigin || '').toUpperCase();
-      const countryName = mooCountry(countryCode);  // Menambahkan bendera negara
+      const countryCode = data.countryOrigin;
+      const countryName = mooCountry(countryCode.toUpperCase());  // Menambahkan bendera negara
 
       return res.status(200).json({
         status: true,
