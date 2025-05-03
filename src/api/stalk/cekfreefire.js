@@ -1,19 +1,17 @@
 const axios = require('axios');
 
 // Fungsi untuk mengambil data dari URL
-async function fetchGameData(url, gameId, serverId = null) {
-  let fullUrl = serverId 
-    ? `${url}?userId=${gameId}&zoneId=${serverId}` 
-    : `${url}?userId=${gameId}&zoneId=undefined`;
-
+async function fetchGameData(url, gameId) {
+  let fullUrl = gameId 
+    
   try {
     const response = await axios.get(fullUrl);
     const data = response.data;
-    console.log(data);
+    console.log(data); // Log data untuk debugging
     return data;
   } catch (error) {
     console.error("Error fetching game data:", error.message);
-    return { status: false, message: error.message };
+    return { status: false, message: error.message }; // Return error jika request gagal
   }
 }
 
@@ -38,19 +36,22 @@ module.exports = function(app) {
     try {
       const result = await validateFreeFireVocagame(gameId);
 
+      // Cek apakah status sukses
       if (result.status && result.message === 'Success') {
         return res.status(200).json({
           status: true,
           gameId,
-          nickname: result.data
+          nickname: result.data || 'Nickname tidak ditemukan'
         });
       } else {
+        // Mengembalikan pesan yang lebih informatif
         return res.status(404).json({
           status: false,
           message: result.message || 'Username tidak ditemukan'
         });
       }
     } catch (error) {
+      // Mengembalikan pesan error jika terjadi exception
       return res.status(500).json({
         status: false,
         message: 'Internal server error',
