@@ -1,7 +1,7 @@
 const axios = require('axios');
 
 async function validateMobileLegends(userId, zoneId) {
-  const params = { userId, zoneId };
+  const params = { api_req: 'deoberon', userId, zoneId };
   try {
     const response = await axios.get('https://cekid.zannstore.com/v2/first-topup', { params });
     const data = response.data;
