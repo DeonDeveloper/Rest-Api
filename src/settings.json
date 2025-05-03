@@ -177,11 +177,6 @@
           "path": "/random/waifu"
         }, 
         {
-          "name": "Random Nsfw",
-          "desc": "Random foto nsfw",
-          "path": "/random/nsfw"
-        }, 
-        {
           "name": "Pap Ayang",
           "desc": "Random pap ayang",
           "path": "/random/papayang"
