@@ -1,27 +1,42 @@
 const axios = require('axios');
 
-// Fungsi untuk mengambil data dari URL
-async function fetchGameData(url, gameId) {
-  let fullUrl = gameId 
-    
+// Fungsi untuk stalk akun Free Fire dari DuniaGames
+async function stalkff(gameId) {
   try {
-    const response = await axios.get(fullUrl);
-    const data = response.data;
-    console.log(data); // Log data untuk debugging
-    return data;
+    const response = await axios.post(
+      'https://api.duniagames.co.id/api/transaction/v1/top-up/inquiry/store',
+      new URLSearchParams({
+        productId: '3',
+        itemId: '353',
+        catalogId: '376',
+        paymentId: '1252',
+        gameId: gameId,
+        product_ref: 'CMS',
+        product_ref_denom: 'REG',
+      }),
+      {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          Referer: 'https://www.duniagames.co.id/',
+          Accept: 'application/json',
+        },
+      }
+    );
+
+    return {
+      status: true,
+      nickname: response.data.data.gameDetail.userName,
+    };
   } catch (error) {
-    console.error("Error fetching game data:", error.message);
-    return { status: false, message: error.message }; // Return error jika request gagal
+    console.error("Error stalking FF:", error.message);
+    return {
+      status: false,
+      message: 'User ID tidak ditemukan atau request gagal',
+    };
   }
 }
 
-// Fungsi untuk memvalidasi Free Fire
-async function validateFreeFireVocagame(gameId) {
-  const url = 'https://api.vocagame.com/v1/order/prepare/FREEFIRE';
-  return await fetchGameData(url, gameId);
-}
-
-// Express.js route untuk memeriksa Free Fire
+// Route Express untuk /check/freefire
 module.exports = function(app) {
   app.get('/stalk/freefire', async (req, res) => {
     const { gameId } = req.query;
@@ -29,33 +44,30 @@ module.exports = function(app) {
     if (!gameId) {
       return res.status(400).json({
         status: false,
-        message: 'Parameter gameId harus diisi.'
+        message: 'Parameter gameId harus diisi.',
       });
     }
 
     try {
-      const result = await validateFreeFireVocagame(gameId);
+      const result = await stalkff(gameId);
 
-      // Cek apakah status sukses
-      if (result.status && result.message === 'Success') {
+      if (result.status) {
         return res.status(200).json({
           status: true,
           gameId,
-          nickname: result.data || 'Nickname tidak ditemukan'
+          nickname: result.nickname,
         });
       } else {
-        // Mengembalikan pesan yang lebih informatif
         return res.status(404).json({
           status: false,
-          message: result.message || 'Username tidak ditemukan'
+          message: result.message,
         });
       }
     } catch (error) {
-      // Mengembalikan pesan error jika terjadi exception
       return res.status(500).json({
         status: false,
         message: 'Internal server error',
-        error: error.message
+        error: error.message,
       });
     }
   });
