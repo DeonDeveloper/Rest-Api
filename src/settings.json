@@ -45,12 +45,6 @@
           "desc": "Cek status payment", 
           "path": "/orderkuota/cekstatus?apikey=&merchant=&keyorkut=", 
           "innerDesc": "Buy apikey >> wa.me/6285784856257"          
-        }, 
-        {
-          "name": "Cek Saldo",
-          "desc": "Cek saldo payment", 
-          "path": "/orderkuota/ceksaldo?apikey=&merchant=&keyorkut=", 
-          "innerDesc": "Buy apikey >> wa.me/6285784856257"          
         }
       ]
     },    
