@@ -1,12 +1,11 @@
 const axios = require('axios');
 
 async function validateFreeFireVocagame(gameId) {
-  const url = 'https://api.vocagame.com/v1/order/prepare/FREEFIRE';
-  const params = { game_id: gameId };
+  const url = `https://api.vocagame.com/v1/order/prepare/FREEFIRE/${gameId}`; // misalnya menggunakan gameId dalam URL langsung
 
   try {
     console.log('Memeriksa akun Free Fire dengan ID:', gameId);
-    const response = await axios.get(url, { params });
+    const response = await axios.get(url);  // Tidak perlu params jika URL langsung mengandung gameId
     const data = response.data;
 
     if (data.message === 'Success') {
