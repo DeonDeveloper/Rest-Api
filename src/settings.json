@@ -1,12 +1,12 @@
 {
-  "name": "Skyzopedia Api",
+  "name": "Deoberon Api",
   "version": "v3.0.0",
   "description": "Simple and easy to use API for WhatsApp Bot feature.",
   "header": {
     "status": "Active!"
   },
   "apiSettings": {
-    "creator": "Skyzopedia", 
+    "creator": "Deoberon", 
     "apikey": ["new2025"]
   },
   "links": [
@@ -42,13 +42,13 @@
           "name": "Create Payment",
           "desc": "Create qris payment", 
           "path": "/orderkuota/createpayment?apikey=&amount=&codeqr=", 
-          "innerDesc": "Buy apikey >> wa.me/628386890336"
+          "innerDesc": "Buy apikey >> wa.me/6285784856257"
         },
         {
           "name": "Cek Status",
           "desc": "Cek status payment", 
           "path": "/orderkuota/cekstatus?apikey=&merchant=&keyorkut=", 
-          "innerDesc": "Buy apikey >> wa.me/628386890336"          
+          "innerDesc": "Buy apikey >> wa.me/6285784856257"          
         }
       ]
     },    
