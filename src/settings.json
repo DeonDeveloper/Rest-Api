@@ -310,12 +310,7 @@
           "name": "Mobile Legends Stalk",
           "desc": "Stalk mobile legends account",
           "path": "/stalk/mlbb?userId=&zoneId="
-        }, 
-        {
-          "name": "Mobile Legends 2 Stalk",
-          "desc": "Stalk mobile legends 2 account",
-          "path": "/stalk/mlbbdb?userId=&zoneId="
-        }            
+        }
       ]
     },
     {
