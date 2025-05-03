@@ -1,47 +1,46 @@
 const axios = require('axios');
 
 async function validateMobileLegendsGopay(userId, zoneId) {
-  const params = { 
-    api_req: 'deoberon', 
+  const params = {
+    api_req: 'deoberon'
     user_id: userId, 
     zone_id: zoneId 
   };
 
   try {
-    console.log('Memeriksa akaun ML dengan data:', params);
+    console.log('Memeriksa akun ML dengan data:', params);
     const response = await axios.get('https://cekid.zannstore.com/v2/first-topup', { params });
     const data = response.data;
 
     if (data.status === 'success') {
-      const nickname = data.nickname;
-      const zone = data.zone;
-      const country = data.country;
-      const countryFlag = data.country_flag;
+      const { nickname, zone, country, country_flag, first_topup } = data;
       let topupInfo = '';
-      
-      data.first_topup.forEach((topup) => {
-        topupInfo += `> *Denom:* ${topup.denom} - *Status:* ${topup.status}\n`;
-      });
+
+      if (Array.isArray(first_topup)) {
+        first_topup.forEach((topup) => {
+          topupInfo += `> *Denom:* ${topup.denom} - *Status:* ${topup.status}\n`;
+        });
+      }
 
       return {
         status: true,
         nickname,
         zone,
         country,
-        countryFlag,
+        countryFlag: country_flag,
         topupInfo
       };
     } else {
       return {
         status: false,
-        message: `Gagal mendapatkan data Mobile Legends Region! ${data.msg}`
+        message: `Gagal mendapatkan data Mobile Legends! ${data.msg || 'Tidak diketahui'}`
       };
     }
   } catch (error) {
     return {
       status: false,
       message: 'Terjadi kesalahan saat validasi.',
-      error: error.message
+      error: error.response?.data || error.message
     };
   }
 }
@@ -59,10 +58,7 @@ module.exports = function(app) {
 
     try {
       const result = await validateMobileLegendsGopay(userId, zoneId);
-      res.status(200).json({
-        status: true,
-        result
-      });
+      res.status(200).json(result);
     } catch (error) {
       res.status(500).json({
         status: false,
