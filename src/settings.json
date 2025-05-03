@@ -1,0 +1,356 @@
+{
+  "name": "Skyzopedia Api",
+  "version": "v3.0.0",
+  "description": "Simple and easy to use API for WhatsApp Bot feature.",
+  "header": {
+    "status": "Active!"
+  },
+  "apiSettings": {
+    "creator": "Skyzopedia", 
+    "apikey": ["new2025"]
+  },
+  "links": [
+    {
+      "name": "Source Code",
+      "url": "https://github.com/rynxzyy/Rynn-UI"
+    },
+    {
+      "name": "Contact Me",
+      "url": "https://whatsapp.com/channel/0029VaYoztA47XeAhs447Y1s"
+    }
+  ],
+  "categories": [
+    {
+      "name": "OpenAI",
+      "items": [
+        {
+          "name": "OpenAI",
+          "desc": "Openai chat",
+          "path": "/ai/openai?text="
+        }, 
+        {
+          "name": "Deepseek",
+          "desc": "Deepseek ai",
+          "path": "/ai/deepseek?text="
+        }        
+      ]
+    },
+    {
+      "name": "Orderkuota Gateway",
+      "items": [
+        {
+          "name": "Create Payment",
+          "desc": "Create qris payment", 
+          "path": "/orderkuota/createpayment?apikey=&amount=&codeqr=", 
+          "innerDesc": "Buy apikey >> wa.me/628386890336"
+        },
+        {
+          "name": "Cek Status",
+          "desc": "Cek status payment", 
+          "path": "/orderkuota/cekstatus?apikey=&merchant=&keyorkut=", 
+          "innerDesc": "Buy apikey >> wa.me/628386890336"          
+        }
+      ]
+    },    
+    {
+      "name": "Downloader",
+      "items": [
+        {
+          "name": "Aio",
+          "desc": "All in downloader",
+          "path": "/download/aio?url="
+        },       
+        {
+          "name": "Tiktok",
+          "desc": "Downloader tiktok",
+          "path": "/download/tiktok?url="
+        }, 
+        {
+          "name": "Tiktok V2",
+          "desc": "Downloader tiktok v2",
+          "path": "/download/tiktok-v2?url="
+        },       
+        {
+          "name": "Twitter",
+          "desc": "Downloader twitter",
+          "path": "/download/twitter?url="
+        },         
+        {
+          "name": "Facebook",
+          "desc": "Downloader facebook",
+          "path": "/download/facebook?url="
+        }, 
+        {
+          "name": "Ytdl",
+          "desc": "Downloader youtube",
+          "path": "/download/ytdl?url="
+        }, 
+        {
+          "name": "Ytmp3",
+          "desc": "Downloader youtube mp3",
+          "path": "/download/ytmp3?url="
+        },        
+        {
+          "name": "Ytmp4",
+          "desc": "Downloader youtube mp4",
+          "path": "/download/ytmp4?url="
+        },        
+        {
+          "name": "Ytdl V2",
+          "desc": "Downloader youtube v2",
+          "path": "/download/ytdl-v2?url="
+        },
+        {
+          "name": "Instagram",
+          "desc": "Downloader instagram",
+          "path": "/download/instagram?url="
+        }, 
+        {
+          "name": "Pinterest",
+          "desc": "Downloader pinterest",
+          "path": "/download/pinterest?url="
+        }, 
+        {
+          "name": "Snackvideo",
+          "desc": "Downloader snackvideo",
+          "path": "/download/snackvideo?url="
+        }, 
+        {
+          "name": "Soundcloud",
+          "desc": "Downloader soundcloud",
+          "path": "/download/soundcloud?url="
+        }, 
+        {
+          "name": "Terabox",
+          "desc": "Downloader terabox",
+          "path": "/download/terabox?url="
+        }, 
+        {
+          "name": "XNXX",
+          "desc": "Downloader xnxx",
+          "path": "/download/xnxx?url="
+        }, 
+        {
+          "name": "9xbuddy",
+          "desc": "All in downloader",
+          "path": "/download/9xbuddy?url="
+        }, 
+        {
+          "name": "Spotify",
+          "desc": "Downloader spotify",
+          "path": "/download/spotify?url="
+        }, 
+        {
+          "name": "Capcut",
+          "desc": "Downloader capcut",
+          "path": "/download/capcut?url="
+        },         
+        {
+          "name": "Play Spotify",
+          "desc": "Play spotify music",
+          "path": "/download/playspotify?q="
+        }, 
+        {
+          "name": "Gdrive",
+          "desc": "Downloader google drive",
+          "path": "/download/gdrive?url="
+        }, 
+        {
+          "name": "Videy",
+          "desc": "Downloader videy",
+          "path": "/download/videy?url="
+        }, 
+        {
+          "name": "Doodstream",
+          "desc": "Downloader doodstream",
+          "path": "/download/doodstream?url="
+        }        
+      ]
+    },
+    {
+      "name": "Random",
+      "items": [
+        {
+          "name": "Blue Archive",
+          "desc": "Random foto blue archive",
+          "path": "/random/ba"
+        }, 
+        {
+          "name": "Random Waifu",
+          "desc": "Random foto waifu",
+          "path": "/random/waifu"
+        }, 
+        {
+          "name": "Random Nsfw",
+          "desc": "Random foto nsfw",
+          "path": "/random/nsfw"
+        }, 
+        {
+          "name": "Pap Ayang",
+          "desc": "Random pap ayang",
+          "path": "/random/papayang"
+        }                       
+      ]
+    },
+    {
+      "name": "Tools",
+      "items": [
+        {
+          "name": "Text-to-speech",
+          "desc": "Tts anime character",
+          "path": "/tools/text-to-speech?text="
+        }, 
+        {
+          "name": "OCR",
+          "desc": "Read text from image",
+          "path": "/tools/ocr?url="
+        },        
+        {
+          "name": "Screenshot Web",
+          "desc": "Screenshot web url",
+          "path": "/tools/ssweb?url="
+        }, 
+        {
+          "name": "Emoji To Gif",
+          "desc": "Convert emoji to gif",
+          "path": "/tools/emojitogif?emoji="
+        }, 
+        {
+          "name": "Emoji Mix",
+          "desc": "Emoji mix converter",
+          "path": "/tools/emojimix?emoji1=&emoji2="
+        }                      
+      ]
+    },    
+    {
+      "name": "Search",
+      "items": [
+        {
+          "name": "Youtube Search",
+          "desc": "Search youtube",
+          "path": "/search/youtube?q="
+        }, 
+        {
+          "name": "Pinterest",
+          "desc": "Search foto pinterest",
+          "path": "/search/youtube?q="
+        }, 
+        {
+          "name": "Google Image",
+          "desc": "Search foto google",
+          "path": "/search/gimage?q="
+        }, 
+        {
+          "name": "Playstore",
+          "desc": "Search apk playstore",
+          "path": "/search/playstore?q="
+        }, 
+        {
+          "name": "Npm Search",
+          "desc": "Search npm nodejs",
+          "path": "/search/npm?q="
+        },        
+        {
+          "name": "Fdroid",
+          "desc": "Search apk fdroid",
+          "path": "/search/fdroid?q="
+        },    
+        {
+          "name": "Happymod",
+          "desc": "Search apk happymod",
+          "path": "/search/happymod?q="
+        },           
+        {
+          "name": "Tiktok",
+          "desc": "Search tiktok video",
+          "path": "/search/tiktok?q="
+        }, 
+        {
+          "name": "XNXX Search",
+          "desc": "Search xnxx video",
+          "path": "/search/xnxx?q="
+        }, 
+        {
+          "name": "Lyrics Search",
+          "desc": "Search lyrics music",
+          "path": "/search/lyrics?q="
+        }, 
+        {
+          "name": "Sfile Search",
+          "desc": "Search url sfile mobi",
+          "path": "/search/sfile?q="
+        }                                   
+      ]
+    }, 
+    {
+      "name": "Stalker",
+      "items": [
+        {
+          "name": "Npm Stalk",
+          "desc": "Stalk npm package",
+          "path": "/stalk/npm?q="
+        },          
+        {
+          "name": "Instagram Stalk",
+          "desc": "Stalk Instagram account",
+          "path": "/stalk/instagram?user="
+        }, 
+        {
+          "name": "Github Stalk",
+          "desc": "Stalk github account",
+          "path": "/stalk/github?user="
+        },        
+        {
+          "name": "Tiktok Stalk",
+          "desc": "Stalk tiktok account",
+          "path": "/stalk/tiktok?user="
+        }, 
+        {
+          "name": "Youtube Stalk",
+          "desc": "Stalk youtube account",
+          "path": "/stalk/youtube?user="
+        }            
+      ]
+    },
+    {
+      "name": "Image Creator",
+      "items": [
+        {
+          "name": "Remini",
+          "desc": "Remini image",
+          "path": "/imagecreator/remini?url="
+        }, 
+        {
+          "name": "Removebg",
+          "desc": "Remove background image",
+          "path": "/imagecreator/removebg?url="
+        }, 
+        {
+          "name": "Upscale",
+          "desc": "Upscale image",
+          "path": "/imagecreator/upscale?url="
+        }, 
+        {
+          "name": "Colorize",
+          "desc": "Colorize image",
+          "path": "/imagecreator/colorize?url="
+        }, 
+        {
+          "name": "Brat",
+          "desc": "Brat text generator",
+          "path": "/imagecreator/brat?text="
+        }                                 
+      ]
+    }, 
+    {
+      "name": "API",
+      "items": [
+        {
+          "name": "Status Api",
+          "desc": "",
+          "path": "/api/status"
+        }                        
+      ]
+    }               
+  ]
+}
