@@ -233,26 +233,35 @@ async function validateMobileLegendsGopay(userId, zoneId) {
   }
 }
 
-module.exports = function(app) {
-  app.get('/stalk/mlbb', async (req, res) => {
-    const { userId, zoneId } = req.query;
+module.exports = function(app) {  
+app.get('/check/mlbb', async (req, res) => {
+  const { userId, zoneId } = req.query;
 
-    if (!userId || !zoneId) {
-      return res.status(400).json({
-        status: false,
-        message: 'Parameter userId dan zoneId harus diisi.'
-      });
-    }
+  if (!userId || !zoneId) {
+    return res.status(400).json({
+      status: false,
+      message: 'Parameter userId dan zoneId harus diisi.'
+    });
+  }
 
-    try {
-      const result = await validateMobileLegendsGopay(userId, zoneId);
-      res.status(200).json({ status: true, result });
-    } catch (error) {
-      res.status(500).json({
-        status: false,
-        message: 'Internal server error',
-        error: error.message
-      });
-    }
-  });
+  try {
+    const result = await validateMobileLegendsGopay(userId, zoneId);
+    
+    const countryCode = result?.result?.data?.countryOrigin?.toUpperCase();
+    const countryInfo = mooCountry(countryCode);
+
+    return res.status(200).json({
+      status: true,
+      username: result.result.data.username,
+      country: countryInfo,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+      message: 'Internal server error',
+      error: error.message
+    });
+  }
+});
+
 };
