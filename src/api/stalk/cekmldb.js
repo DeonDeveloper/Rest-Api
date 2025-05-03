@@ -1,8 +1,14 @@
 const axios = require('axios');
 
-async function validateMobileLegends(userId, zoneId) {
-  const params = { api_req: 'deoberon', userId, zoneId };
+async function validateMobileLegendsGopay(userId, zoneId) {
+  const params = { 
+    api_req: 'deoberon', 
+    user_id: userId, 
+    zone_id: zoneId 
+  };
+
   try {
+    console.log('Memeriksa akaun ML dengan data:', params);
     const response = await axios.get('https://cekid.zannstore.com/v2/first-topup', { params });
     const data = response.data;
 
@@ -12,7 +18,8 @@ async function validateMobileLegends(userId, zoneId) {
       const country = data.country;
       const countryFlag = data.country_flag;
       let topupInfo = '';
-      data.first_topup.forEach((topup, index) => {
+      
+      data.first_topup.forEach((topup) => {
         topupInfo += `> *Denom:* ${topup.denom} - *Status:* ${topup.status}\n`;
       });
 
@@ -27,7 +34,7 @@ async function validateMobileLegends(userId, zoneId) {
     } else {
       return {
         status: false,
-        message: 'Topup pertama tidak tersedia.'
+        message: `Gagal mendapatkan data Mobile Legends Region! ${data.msg}`
       };
     }
   } catch (error) {
@@ -51,7 +58,7 @@ module.exports = function(app) {
     }
 
     try {
-      const result = await validateMobileLegends(userId, zoneId);
+      const result = await validateMobileLegendsGopay(userId, zoneId);
       res.status(200).json({
         status: true,
         result
