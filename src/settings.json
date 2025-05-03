@@ -33,7 +33,7 @@
           "name": "LuminAI",
           "desc": "Luminai chat",
           "path": "/ai/luminai?text="
-        },
+        }
       ]
     },
     {
