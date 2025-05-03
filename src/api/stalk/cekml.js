@@ -51,7 +51,7 @@ async function validateMobileLegendsGopay(userId, zoneId) {
 }
 
 module.exports = function(app) {
-  app.get('/check/mlbb', async (req, res) => {
+  app.get('/stalk/mlbb', async (req, res) => {
     const { userId, zoneId } = req.query;
 
     if (!userId || !zoneId) {
