@@ -11,10 +11,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (element) element[property] = value;
         };
         
-        setContent('page', 'textContent', settings.name || "Skyzopedia UI");
-        setContent('wm', 'textContent', `© 2025 ${settings.apiSettings.creator}. All rights reserved.` || "© 2025 Skyzopedia. All rights reserved.");
-        setContent('header', 'textContent', settings.name || "Skyzopedia UI");
-        setContent('name', 'textContent', settings.name || "Skyzopedia UI");
+        setContent('page', 'textContent', settings.name || "Deoberon Api");
+        setContent('wm', 'textContent', `© 2025 ${settings.apiSettings.creator}. All rights reserved.` || "© 2025 Deoberon. All rights reserved.");
+        setContent('header', 'textContent', settings.name || "Deoberon Api");
+        setContent('name', 'textContent', settings.name || "Deoberon Api");
         setContent('version', 'textContent', settings.version || "v1.0");
         setContent('versionHeader', 'textContent', settings.header.status || "Active!");
         setContent('description', 'textContent', settings.description || "Simple API's");
