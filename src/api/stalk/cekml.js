@@ -273,6 +273,10 @@ async function validateMobileLegendsGopay(userId, zoneId) {
       body: JSON.stringify(payload)
     });
 
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
     const result = await response.json();
     return result;
   } catch (error) {
@@ -285,7 +289,7 @@ async function validateMobileLegendsGopay(userId, zoneId) {
 }
 
 module.exports = function(app) {
-  app.get('/stalk/mlbb', async (req, res) => {
+  app.get('/check/mlbb', async (req, res) => {
     const { userId, zoneId } = req.query;
 
     if (!userId || !zoneId) {
