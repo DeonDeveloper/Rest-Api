@@ -305,6 +305,11 @@
           "name": "Youtube Stalk",
           "desc": "Stalk youtube account",
           "path": "/stalk/youtube?user="
+        }, 
+        {
+          "name": "Mobile Legends Stalk",
+          "desc": "Stalk mobile legends account",
+          "path": "/stalk/mlbb?userId=&zoneId="
         }            
       ]
     },
