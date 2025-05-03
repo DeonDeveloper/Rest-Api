@@ -29,7 +29,7 @@ global.totalreq += 1
         if (data && typeof data === 'object') {
             const responseData = {
                 status: data.status,
-                creator: settings.apiSettings.creator || "Created Using Skyzo",
+                creator: settings.apiSettings.creator || "Created Using Deoberon",
                 ...data
             };
             return originalJson.call(this, responseData);
