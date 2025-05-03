@@ -1,6 +1,6 @@
 {
   "name": "Deoberon Api",
-  "version": "v3.0.0",
+  "version": "v1.0.0",
   "description": "Simple and easy to use API for WhatsApp Bot feature.",
   "header": {
     "status": "Active!"
