@@ -28,7 +28,12 @@
           "name": "Deepseek",
           "desc": "Deepseek ai",
           "path": "/ai/deepseek?text="
-        }        
+        }, 
+        {
+          "name": "LuminAI",
+          "desc": "Luminai chat",
+          "path": "/ai/luminai?text="
+        },
       ]
     },
     {
