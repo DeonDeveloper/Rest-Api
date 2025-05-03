@@ -1,33 +1,29 @@
 const axios = require('axios');
 
-async function validateFreeFireVocagame(gameId) {
-  const url = `https://api.vocagame.com/v1/order/prepare/FREEFIRE/${gameId}`; // misalnya menggunakan gameId dalam URL langsung
+// Fungsi untuk mengambil data dari URL
+async function fetchGameData(url, gameId, serverId = null) {
+  let fullUrl = serverId 
+    ? `${url}?userId=${gameId}&zoneId=${serverId}` 
+    : `${url}?userId=${gameId}&zoneId=undefined`;
 
   try {
-    console.log('Memeriksa akun Free Fire dengan ID:', gameId);
-    const response = await axios.get(url);  // Tidak perlu params jika URL langsung mengandung gameId
+    const response = await axios.get(fullUrl);
     const data = response.data;
-
-    if (data.message === 'Success') {
-      return {
-        status: true,
-        nickname: data.data
-      };
-    } else {
-      return {
-        status: false,
-        message: 'Username tidak ditemukan'
-      };
-    }
+    console.log(data);
+    return data;
   } catch (error) {
-    return {
-      status: false,
-      message: 'Terjadi kesalahan saat menghubungi server',
-      error: error.message
-    };
+    console.error("Error fetching game data:", error.message);
+    return { status: false, message: error.message };
   }
 }
 
+// Fungsi untuk memvalidasi Free Fire
+async function validateFreeFireVocagame(gameId) {
+  const url = 'https://api.vocagame.com/v1/order/prepare/FREEFIRE';
+  return await fetchGameData(url, gameId);
+}
+
+// Express.js route untuk memeriksa Free Fire
 module.exports = function(app) {
   app.get('/stalk/freefire', async (req, res) => {
     const { gameId } = req.query;
@@ -42,16 +38,16 @@ module.exports = function(app) {
     try {
       const result = await validateFreeFireVocagame(gameId);
 
-      if (result.status) {
+      if (result.status && result.message === 'Success') {
         return res.status(200).json({
           status: true,
           gameId,
-          nickname: result.nickname
+          nickname: result.data
         });
       } else {
         return res.status(404).json({
           status: false,
-          message: result.message
+          message: result.message || 'Username tidak ditemukan'
         });
       }
     } catch (error) {
