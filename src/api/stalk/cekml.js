@@ -292,35 +292,38 @@ async function validateMobileLegendsGopay(userId, zoneId) {
 
 module.exports = function(app) {
   app.get('/stalk/mlbb', async (req, res) => {
-    const { userId, zoneId } = req.query;
+  const { userId, zoneId } = req.query;
 
-    if (!userId || !zoneId) {
-      return res.status(400).json({
-        status: false,
-        message: 'Parameter userId dan zoneId harus diisi.'
-      });
-    }
+  if (!userId || !zoneId) {
+    return res.status(400).json({
+      status: false,
+      message: 'Parameter userId dan zoneId harus diisi.'
+    });
+  }
 
-    try {
-      const result = await validateMobileLegendsGopay(userId, zoneId);
+  try {
+    const result = await validateMobileLegendsGopay(userId, zoneId);
 
-      // Mendapatkan data username dan negara dari response
-      const data = result.data;
-      const username = data.username || 'Tidak ditemukan';
-      const countryCode = data.countryOrigin;
-      const countryName = mooCountry(countryCode.toUpperCase());  // Menambahkan bendera negara
+    const data = result.data;
+    const username = data.username || 'Tidak ditemukan';
+    const countryCode = data.countryOrigin?.toUpperCase() || '';
+    const countryFull = mooCountry(countryCode);
 
-      return res.status(200).json({
-        status: true,
-        username,
-        country: countryName
-      });
-    } catch (error) {
-      return res.status(500).json({
-        status: false,
-        message: 'Internal server error',
-        error: error.message
-      });
-    }
-  });
+    // Ambil hanya emoji dari akhir string nama negara
+    const flagEmoji = countryFull.match(/[\u{1F1E6}-\u{1F1FF}]{2}/u)?.[0] || '';
+
+    return res.status(200).json({
+      status: true,
+      username,
+      country: countryFull,
+      country_flag: flagEmoji
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+      message: 'Internal server error',
+      error: error.message
+    });
+  }
+});
 };
