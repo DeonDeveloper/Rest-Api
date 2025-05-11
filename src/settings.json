@@ -30,9 +30,9 @@
           "path": "/ai/deepseek?text="
         }, 
         {
-          "name": "LuminAI",
-          "desc": "Luminai chat",
-          "path": "/ai/luminai?text="
+          "name": "D-AI",
+          "desc": "D-AI chat",
+          "path": "/ai/d-ai?text="
         }
       ]
     },
