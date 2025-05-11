@@ -18,7 +18,7 @@ module.exports = function(app) {
         }
     }
 
-    app.get('/ai/luminai', async (req, res) => {
+    app.get('/ai/d-ai', async (req, res) => {
         try {
             const { text } = req.query;
             if (!text) {
