@@ -30,9 +30,9 @@
           "path": "/ai/deepseek?text="
         }, 
         {
-          "name": "D-AI",
-          "desc": "D-AI chat",
-          "path": "/ai/d-ai?text="
+          "name": "DexiellAI",
+          "desc": "Dexiell chat",
+          "path": "/ai/dexiell?text="
         }
       ]
     },
