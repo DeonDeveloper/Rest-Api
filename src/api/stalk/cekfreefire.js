@@ -302,7 +302,13 @@ module.exports = function(app) {
     try {
       const result = await stalkFreeFire(id);
 
-      
+      if (!result.nickname) {
+        return res.status(404).json({
+          status: false,
+          message: 'Data tidak ditemukan. Pastikan ID Free Fire yang dimasukkan benar.'
+        });
+      }
+
   
       const nickname = result.nickname || 'Tidak ditemukan';
       const regionCode = (result.region || '').toUpperCase();
