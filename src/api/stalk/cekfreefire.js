@@ -1,75 +1,82 @@
-const axios = require('axios');
+const fetch = require('node-fetch');
 
-// Fungsi untuk stalk akun Free Fire dari DuniaGames
-async function stalkff(id) {
-  return new Promise(async (resolve) => {
-    try {
-      const response = await axios.post(
-        'https://api.duniagames.co.id/api/transaction/v1/top-up/inquiry/store',
-        new URLSearchParams({
-          productId: '3',
-          itemId: '353',
-          catalogId: '376',
-          paymentId: '1252',
-          gameId: id,
-          product_ref: 'CMS',
-          product_ref_denom: 'REG',
-        }),
-        {
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            Referer: 'https://www.duniagames.co.id/',
-            Accept: 'application/json',
-          },
-        }
-      );
+// Fungsi untuk mengonversi kode negara ke nama lengkap dengan bendera
+const mooCountry = (value) => {
+  const regionMap = {
+    ID: 'Indonesia 🇮🇩',
+    BR: 'Brazil 🇧🇷',
+    VN: 'Vietnam 🇻🇳',
+    TH: 'Thailand 🇹🇭',
+    IN: 'India 🇮🇳',
+    PK: 'Pakistan 🇵🇰',
+    BD: 'Bangladesh 🇧🇩',
+    PH: 'Filipina 🇵🇭',
+    US: 'Amerika Serikat 🇺🇸',
+    // Tambahkan kode negara lain yang relevan jika perlu...
+  };
 
-      resolve({
-        status: 200,
-        id,
-        nickname: response.data.data.gameDetail.userName,
-      });
-    } catch (err) {
-      resolve({
-        status: 404,
-        msg: 'User ID tidak ditemukan atau request gagal',
-      });
+  return regionMap[value] || 'Tidak diketahui';
+};
+
+// Fungsi untuk stalk akun Free Fire via API SimpleBot
+async function stalkFreeFire(id) {
+  const url = `https://api-simplebot.vercel.app/stalk/ff?apikey=free&id=${encodeURIComponent(id)}`;
+
+  try {
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
-  });
+
+    const result = await response.json();
+    return result;
+  } catch (error) {
+    return {
+      status: false,
+      message: 'Terjadi kesalahan saat mengambil data.',
+      error: error.message
+    };
+  }
 }
 
-// Route Express untuk /check/freefire
 module.exports = function(app) {
-  app.get('/stalk/freefire', async (req, res) => {
-    const { gameId } = req.query;
+  app.get('/stalk/ff', async (req, res) => {
+    const { id } = req.query;
 
-    if (!gameId) {
+    if (!id) {
       return res.status(400).json({
         status: false,
-        message: 'Parameter gameId harus diisi.',
+        message: 'Parameter id harus diisi.'
       });
     }
 
     try {
-      const result = await stalkff(gameId);
+      const result = await stalkFreeFire(id);
 
-      if (result.status === 200) {
-        return res.status(200).json({
-          status: true,
-          gameId: result.id,
-          nickname: result.nickname,
-        });
-      } else {
+      if (!result || !result.result || !result.result.nickname) {
         return res.status(404).json({
           status: false,
-          message: result.msg,
+          message: 'Data tidak ditemukan. Pastikan ID Free Fire yang dimasukkan benar.'
         });
       }
+
+      const data = result.result;
+      const nickname = data.nickname || 'Tidak ditemukan';
+      const regionCode = (data.region || '').toUpperCase();
+      const regionFull = mooCountry(regionCode);
+      const flagEmoji = regionFull.match(/[\u{1F1E6}-\u{1F1FF}]{2}/u)?.[0] || '';
+
+      return res.status(200).json({
+        status: true,
+        nickname,
+        region: regionFull,
+        region_flag: flagEmoji
+      });
     } catch (error) {
       return res.status(500).json({
         status: false,
         message: 'Internal server error',
-        error: error.message,
+        error: error.message
       });
     }
   });
