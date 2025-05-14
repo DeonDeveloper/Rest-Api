@@ -286,7 +286,7 @@ let config = {
 };
 
 const api = await axios.request(config);
-const result = api.data;
+return api.data;
 }
 module.exports = function(app) {
   app.get('/stalk/ff', async (req, res) => {
