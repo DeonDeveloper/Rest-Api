@@ -1,4 +1,4 @@
-const fetch = require('node-fetch');
+const axios = require('axios');
 
 // Fungsi untuk mengonversi kode negara ke nama lengkap dengan bendera
 const mooCountry = (value) => {
@@ -257,23 +257,40 @@ const mooCountry = (value) => {
   return regionMap[value] || 'Tidak diketahui';
 };
 
-// Fungsi untuk stalk akun Free Fire via API SimpleBot
+// Fungsi untuk stalk akun Free Fire via kiosgamer
 async function stalkFreeFire(id) {
-  const url = `https://api-simplebot.vercel.app/stalk/ff?apikey=free&id=${encodeURIComponent(id)}`;
+  const url = 'https://kiosgamer.co.id/api/auth/player_id_login';
+
+  const data = {
+    app_id: 100067,
+    login_id: id
+  };
 
   try {
-    const response = await fetch(url);
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
+    const response = await axios.post(url, data, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Mobile Safari/537.36',
+        'Accept': 'application/json, text/plain, */*',
+        'Content-Type': 'application/json',
+        'sec-ch-ua-platform': '"Android"',
+        'sec-ch-ua': '"Chromium";v="134", "Not:A-Brand";v="24", "Google Chrome";v="134"',
+        'sec-ch-ua-mobile': '?1',
+        'Origin': 'https://kiosgamer.co.id',
+        'Sec-Fetch-Site': 'same-origin',
+        'Sec-Fetch-Mode': 'cors',
+        'Sec-Fetch-Dest': 'empty',
+        'Referer': 'https://kiosgamer.co.id'
+      }
+    });
 
-    const result = await response.json();
+    const result = response.data;
     return result;
+
   } catch (error) {
     return {
       status: false,
       message: 'Terjadi kesalahan saat mengambil data.',
-      error: error.message
+      error: error.response?.data || error.message
     };
   }
 }
@@ -292,16 +309,16 @@ module.exports = function(app) {
     try {
       const result = await stalkFreeFire(id);
 
-      if (!result || !result.result || !result.result.nickname) {
+      if (!result || result.status === false || !result.data?.user_name) {
         return res.status(404).json({
           status: false,
-          message: 'Data tidak ditemukan. Pastikan ID Free Fire yang dimasukkan benar.'
+          message: 'Data tidak ditemukan. Pastikan ID Free Fire yang dimasukkan benar.',
+          detail: result?.message || undefined
         });
       }
 
-      const data = result.result;
-      const nickname = data.nickname || 'Tidak ditemukan';
-      const regionCode = (data.region || '').toUpperCase();
+      const nickname = result.data.user_name;
+      const regionCode = (result.data?.area || '').toUpperCase();
       const regionFull = mooCountry(regionCode);
       const flagEmoji = regionFull.match(/[\u{1F1E6}-\u{1F1FF}]{2}/u)?.[0] || '';
 
@@ -311,6 +328,7 @@ module.exports = function(app) {
         region: regionFull,
         region_flag: flagEmoji
       });
+
     } catch (error) {
       return res.status(500).json({
         status: false,
