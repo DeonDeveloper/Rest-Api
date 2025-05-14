@@ -310,6 +310,11 @@
           "name": "Mobile Legends Stalk",
           "desc": "Stalk mobile legends account",
           "path": "/stalk/mlbb?userId=&zoneId="
+        }, 
+        {
+          "name": "Free Fire Stalk",
+          "desc": "Stalk free fire account",
+          "path": "/stalk/ff?id="
         }
       ]
     },
