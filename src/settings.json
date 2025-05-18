@@ -312,6 +312,11 @@
           "path": "/stalk/mlbb?userId=&zoneId="
         }, 
         {
+          "name": "Genshin Impact Stalk",
+          "desc": "Stalk genshin impact account",
+          "path": "/stalk/genshin?uid="
+        }, 
+        {
           "name": "Free Fire Stalk",
           "desc": "Stalk free fire account",
           "path": "/stalk/ff?id="
