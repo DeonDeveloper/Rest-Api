@@ -1,7 +1,7 @@
 const fetch = require('node-fetch');
 
-async function stalkFreeFire(id) {
-  const url = `https://enka.network/api/uid/${id}?info`;
+async function stalkGenshin(uid) {
+  const url = `https://enka.network/api/uid/${uid}?info`;
 
   const res = await fetch(url, {
     headers: {
@@ -19,17 +19,17 @@ async function stalkFreeFire(id) {
 
 module.exports = function (app) {
   app.get('/stalk/genshin', async (req, res) => {
-    const { id } = req.query;
+    const { uid } = req.query;
 
-    if (!id) {
+    if (!uid) {
       return res.status(400).json({
         status: false,
-        message: 'Parameter id harus diisi.',
+        message: 'Parameter uid harus diisi.',
       });
     }
 
     try {
-      const result = await stalkFreeFire(id);
+      const result = await stalkGenshin(uid);
 
       if (!result.playerInfo) {
         return res.status(404).json({
