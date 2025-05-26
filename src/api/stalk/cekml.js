@@ -295,54 +295,67 @@ async function getMLFirstTopup(userId, zoneId) {
   try {
     const url = `https://api.hamsoffc.me/stalk/ml-first-topup?apikey=HAMS-c2b941909b5e&id=${userId}&zoneId=${zoneId}`;
     const res = await fetch(url);
+
+    if (!res.ok) {
+      throw new Error(`HTTP error! status: ${res.status}`);
+    }
+
     const json = await res.json();
 
-    if (json.status !== 200 || !json.result?.first_topup) {
-      return { success: false, message: 'Gagal mengambil data first topup.' };
+    if (json.status !== 200 || !json.result || typeof json.result.first_topup !== 'boolean') {
+      return { success: false, message: 'Data first topup tidak tersedia atau format tidak valid.' };
     }
+
+    return {
+      success: true,
+      isFirstTopup: json.result.first_topup
+    };
   } catch (e) {
-    return { success: false, message: 'Terjadi kesalahan saat mengambil data first topup.' };
+    return {
+      success: false,
+      message: 'Gagal mengambil data first topup.',
+      error: e.message
+    };
   }
 }
-       
+
 
 module.exports = function(app) {
   app.get('/stalk/mlbb', async (req, res) => {
-  const { userId, zoneId } = req.query;
+    const { userId, zoneId } = req.query;
 
-  if (!userId || !zoneId) {
-    return res.status(400).json({
-      status: false,
-      message: 'Parameter userId dan zoneId harus diisi.'
-    });
-  }
+    if (!userId || !zoneId) {
+      return res.status(400).json({
+        status: false,
+        message: 'Parameter userId dan zoneId harus diisi.'
+      });
+    }
 
-  try {
-    const result = await validateMobileLegendsGopay(userId, zoneId);
-    const result2 = await getMLFirstTopup(userId, zoneId);
-        
-    const firstTopup = result2.result.first_topup
-    const data = result.data;
-    const username = data.username || 'Tidak ditemukan';
-    const countryCode = data.countryOrigin?.toUpperCase() || '';
-    const countryFull = mooCountry(countryCode);
+    try {
+      const result = await validateMobileLegendsGopay(userId, zoneId);
+      const result2 = await getMLFirstTopup(userId, zoneId);
 
-    // Ambil hanya emoji dari akhir string nama negara
-    const flagEmoji = countryFull.match(/[\u{1F1E6}-\u{1F1FF}]{2}/u)?.[0] || '';
+      const data = result.data;
+      const username = data.username || 'Tidak ditemukan';
+      const countryCode = data.countryOrigin?.toUpperCase() || '';
+      const countryFull = mooCountry(countryCode);
 
-    return res.status(200).json({
-      status: true,
-      username,
-      country: countryFull,
-      country_flag: flagEmoji, 
-      firstTopup: firstTopup
-    });
-  } catch (error) {
-    return res.status(500).json({
-      status: false,
-      message: 'Internal server error',
-      error: error.message
-    });
-  }
-});
+      // Ambil hanya emoji dari akhir string nama negara
+      const flagEmoji = countryFull.match(/[\u{1F1E6}-\u{1F1FF}]{2}/u)?.[0] || '';
+
+      return res.status(200).json({
+        status: true,
+        username,
+        country: countryFull,
+        country_flag: flagEmoji,
+        firstTopup: result2.success ? result2.isFirstTopup : 'Tidak diketahui'
+      });
+    } catch (error) {
+      return res.status(500).json({
+        status: false,
+        message: 'Internal server error',
+        error: error.message
+      });
+    }
+  });
 };
