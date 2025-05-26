@@ -355,7 +355,7 @@ module.exports = function(app) {
         username,
         country: countryFull,
         country_flag: flagEmoji,
-        firstTopup: result2.success ? result2.isFirstTopup : 'Tidak diketahui'
+        firstTopup: result2.isFirstTopup : 'Tidak diketahui'
       });
     } catch (error) {
       return res.status(500).json({
