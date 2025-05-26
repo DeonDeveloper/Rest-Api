@@ -311,7 +311,10 @@ async function getMLFirstTopup(userId, zoneId) {
 
 module.exports = function (app) {
   app.get('/stalk/mlbb', async (req, res) => {
-    const { userId, zoneId } = req.query;
+    const { apikey, userId, zoneId } = req.query;
+    const check = global.apikey
+    if (!global.apikey.includes(apikey)) return res.json("Apikey tidak valid.")
+
 
     if (!userId || !zoneId) {
       return res.status(400).json({ status: false, message: 'Parameter userId dan zoneId harus diisi.' });
