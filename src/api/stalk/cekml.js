@@ -297,7 +297,6 @@ async function getMLFirstTopup(userId, zoneId) {
     if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
     const json = await res.json();
 
-    // Ambil langsung objek first_topup
     const firstTopup = json?.result?.first_topup;
 
     if (!firstTopup) {
@@ -310,37 +309,38 @@ async function getMLFirstTopup(userId, zoneId) {
   }
 }
 
-// Export fungsi yang menerima app dan pasang route
 module.exports = function (app) {
   app.get('/stalk/mlbb', async (req, res) => {
-  const { userId, zoneId } = req.query;
+    const { userId, zoneId } = req.query;
 
-  if (!userId || !zoneId) {
-    return res.status(400).json({ status: false, message: 'Parameter userId dan zoneId harus diisi.' });
-  }
+    if (!userId || !zoneId) {
+      return res.status(400).json({ status: false, message: 'Parameter userId dan zoneId harus diisi.' });
+    }
 
-  try {
-    const result = await validateMobileLegendsGopay(userId, zoneId);
-    const result2 = await getMLFirstTopup(userId, zoneId);
+    try {
+      const result = await validateMobileLegendsGopay(userId, zoneId);
+      const result2 = await getMLFirstTopup(userId, zoneId);
 
-    const data = result.data || {};
-    const username = data.username || 'Tidak ditemukan';
-    const countryCode = (data.countryOrigin || '').toUpperCase();
-    const countryFull = mooCountry(countryCode);
-    const flagEmoji = countryFull.match(/[\u{1F1E6}-\u{1F1FF}]{2}/u)?.[0] || '';
+      const data = result.data || {};
+      const username = data.username || 'Tidak ditemukan';
+      const countryCode = (data.countryOrigin || '').toUpperCase();
+      const countryFull = mooCountry(countryCode);
+      // Cari emoji bendera, fallback ke kosong jika tidak ada
+      const flagEmoji = countryFull.match(/[\u{1F1E6}-\u{1F1FF}]{2}/u)?.[0] || '';
 
-    return res.status(200).json({
-      status: true,
-      username,
-      country: countryFull,
-      country_flag: flagEmoji,
-      firstTopup: result2.success ? result2.firstTopup : null
-    });
-  } catch (error) {
-    return res.status(500).json({
-      status: false,
-      message: 'Internal server error',
-      error: error.message
-    });
-  }
-});
+      return res.status(200).json({
+        status: true,
+        username,
+        country: countryFull,
+        country_flag: flagEmoji,
+        firstTopup: result2.success ? result2.firstTopup : null,
+      });
+    } catch (error) {
+      return res.status(500).json({
+        status: false,
+        message: 'Internal server error',
+        error: error.message,
+      });
+    }
+  });
+};
