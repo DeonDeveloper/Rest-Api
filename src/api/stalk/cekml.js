@@ -290,6 +290,22 @@ async function validateMobileLegendsGopay(userId, zoneId) {
   }
 }
 
+ // Fungsi untuk cek status first topup MLBB
+async function getMLFirstTopup(userId, zoneId) {
+  try {
+    const url = `https://api.hamsoffc.me/stalk/ml-first-topup?apikey=HAMS-c2b941909b5e&id=${userId}&zoneId=${zoneId}`;
+    const res = await fetch(url);
+    const json = await res.json();
+
+    if (json.status !== 200 || !json.result?.first_topup) {
+      return { success: false, message: 'Gagal mengambil data first topup.' };
+    }
+  } catch (e) {
+    return { success: false, message: 'Terjadi kesalahan saat mengambil data first topup.' };
+  }
+}
+       
+
 module.exports = function(app) {
   app.get('/stalk/mlbb', async (req, res) => {
   const { userId, zoneId } = req.query;
@@ -303,7 +319,9 @@ module.exports = function(app) {
 
   try {
     const result = await validateMobileLegendsGopay(userId, zoneId);
-
+    const result2 = await getMLFirstTopup(userId, zoneId);
+        
+    const firstTopup = result2.result.first_topup
     const data = result.data;
     const username = data.username || 'Tidak ditemukan';
     const countryCode = data.countryOrigin?.toUpperCase() || '';
@@ -316,7 +334,8 @@ module.exports = function(app) {
       status: true,
       username,
       country: countryFull,
-      country_flag: flagEmoji
+      country_flag: flagEmoji, 
+      firstTopup: firstTopup
     });
   } catch (error) {
     return res.status(500).json({
