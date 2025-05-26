@@ -290,7 +290,7 @@ async function validateMobileLegendsGopay(userId, zoneId) {
   }
 }
 
- // Fungsi untuk cek status first topup MLBB
+// Fungsi untuk cek status first topup MLBB
 async function getMLFirstTopup(userId, zoneId) {
   try {
     const url = `https://api.hamsoffc.me/stalk/ml-first-topup?apikey=HAMS-c2b941909b5e&id=${userId}&zoneId=${zoneId}`;
@@ -302,13 +302,20 @@ async function getMLFirstTopup(userId, zoneId) {
 
     const json = await res.json();
 
-    if (json.status !== 200 || !json.result || typeof json.result.first_topup !== 'boolean') {
-      return { success: false, message: 'Data first topup tidak tersedia atau format tidak valid.' };
+    const packages = json?.result?.first_topup?.packages;
+    if (!Array.isArray(packages)) {
+      return {
+        success: false,
+        message: 'Paket first topup tidak tersedia atau format tidak valid.'
+      };
     }
+
+    // Cek apakah ada setidaknya satu paket dengan status "✅ Tersedia"
+    const isFirstTopup = packages.some(pkg => pkg.status.includes('✅'));
 
     return {
       success: true,
-      isFirstTopup: json.result.first_topup
+      isFirstTopup
     };
   } catch (e) {
     return {
