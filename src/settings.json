@@ -315,12 +315,13 @@
         {
           "name": "Genshin Impact Stalk",
           "desc": "Stalk genshin impact account",
-          "path": "/stalk/genshin?uid="
+          "path": "/stalk/genshin?apikey=&uid="
         }, 
         {
           "name": "Free Fire Stalk",
           "desc": "Stalk free fire account",
-          "path": "/stalk/ff?id="
+          "path": "/stalk/ff?apikey=&id=", 
+          "innerDesc": "Buy apikey >> wa.me/6285784856257"
         }
       ]
     },
