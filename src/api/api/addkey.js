@@ -1,6 +1,6 @@
 // src/routes/addkey
 const fs = require('fs');
-const path = require('path'(;
+const path = require('path');
 
 const settingsPath = path.join(process.cwd(), 'src/settings.json');
 
