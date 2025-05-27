@@ -315,7 +315,8 @@
         {
           "name": "Genshin Impact Stalk",
           "desc": "Stalk genshin impact account",
-          "path": "/stalk/genshin?apikey=&uid="
+          "path": "/stalk/genshin?apikey=&uid=", 
+          "innerDesc": "Buy apikey >> wa.me/6285784856257"
         }, 
         {
           "name": "Free Fire Stalk",
