@@ -290,7 +290,10 @@ return api.data;
 }
 module.exports = function(app) {
   app.get('/stalk/ff', async (req, res) => {
-    const { id } = req.query;
+    const { apikey, id } = req.query;
+    const check = global.apikey
+    if (!global.apikey.includes(apikey)) return res.json("Apikey tidak valid.")
+
     
     if (!id) {
       return res.status(400).json({
