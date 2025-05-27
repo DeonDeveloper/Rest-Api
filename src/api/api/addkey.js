@@ -1,6 +1,6 @@
-// src/routes/addkey.js
-import fs from 'fs';
-import path from 'path';
+// src/routes/addkey
+const fs = require('fs');
+const path = require('path'(;
 
 const settingsPath = path.join(process.cwd(), 'src/settings.json');
 
