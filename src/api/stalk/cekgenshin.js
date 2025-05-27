@@ -19,8 +19,10 @@ async function stalkGenshin(uid) {
 
 module.exports = function (app) {
   app.get('/stalk/genshin', async (req, res) => {
-    const { uid } = req.query;
-
+    const { apikey, uid } = req.query;
+    const check = global.apikey
+    if (!global.apikey.includes(apikey)) return res.json("Apikey tidak valid.")
+    
     if (!uid) {
       return res.status(400).json({
         status: false,
