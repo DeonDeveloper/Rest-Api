@@ -361,7 +361,12 @@
           "name": "Status Api",
           "desc": "",
           "path": "/api/status"
-        }                        
+        },
+        {
+          "name": "Add Apikey",
+          "desc": "",
+          "path": "/api/addkey?newKey="
+        }
       ]
     }               
   ]
