@@ -17,9 +17,41 @@ app.use(cors());
 app.use('/', express.static(path.join(__dirname, 'api-page')));
 app.use('/src', express.static(path.join(__dirname, 'src')));
 
-const settingsPath = path.join(__dirname, './src/settings.json');
-const settings = JSON.parse(fs.readFileSync(settingsPath, 'utf-8'));
-global.apikey = settings.apiSettings.apikey
+const settingsPathh = path.join(__dirname, './src/settings.json');
+const settingss = JSON.parse(fs.readFileSync(settingsPathh, 'utf-8'));
+global.apikey = settingss.apiSettings.apikey
+
+const settingsPath = path.join(process.cwd(), 'src/settings.json');
+
+export default function handler(req, res) {
+  if (req.method !== 'POST') {
+    return res.status(405).json({ status: false, message: 'Hanya menerima metode POST' });
+  }
+
+  const { newKey } = req.body;
+
+  if (!newKey || typeof newKey !== 'string') {
+    return res.status(400).json({ status: false, message: 'Parameter newKey tidak valid' });
+  }
+
+  try {
+    const settings = JSON.parse(fs.readFileSync(settingsPath, 'utf-8'));
+
+    // Cek apakah key sudah ada
+    if (settings.apiSettings.apikey.includes(newKey)) {
+      return res.status(409).json({ status: false, message: 'API key sudah terdaftar' });
+    }
+
+    settings.apiSettings.apikey.push(newKey);
+
+    fs.writeFileSync(settingsPath, JSON.stringify(settings, null, 2));
+
+    return res.status(200).json({ status: true, message: 'API key berhasil ditambahkan', apikeys: settings.apiSettings.apikey });
+  } catch (error) {
+    return res.status(500).json({ status: false, message: 'Gagal menulis ke settings.json', error: error.message });
+  }
+}
+
 
 app.use((req, res, next) => {
 console.log(chalk.bgHex('#FFFF99').hex('#333').bold(` Request Route: ${req.path} `));
