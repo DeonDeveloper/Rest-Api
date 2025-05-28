@@ -309,7 +309,7 @@
         {
           "name": "Mobile Legends Stalk",
           "desc": "Stalk mobile legends account",
-          "path": "/stalk/mlbb?apikey=&userId=&zoneId=", 
+          "path": "/stalk/mlbb-first?apikey=&userId=&zoneId=", 
           "innerDesc": "Buy apikey >> wa.me/6285784856257"
         }, 
         {
