@@ -357,7 +357,7 @@
         {
           "name": "Brat",
           "desc": "Brat text generator",
-          "path": "/imagecreator/brat/generator?text="
+          "path": "/imagecreator/brat/generator?q=&speed=&animated="
         }
       ]
     }, 
