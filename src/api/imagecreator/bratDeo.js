@@ -12,9 +12,8 @@ const port = 3000;
 registerFont(path.join(__dirname, 'fonts', 'Arial.ttf'), { family: 'Arial' });
 
 app.get('/imagecreator/brat/generator', async (req, res) => {
-  const { q } = req.query || 'Hello World!';
-  const { speed } = req.query || 'medium';
-  const { animated } = req.query === 'true'; // Ganti dari isvideo ke animated
+  const { q, speed, animated} = req.query
+
  /* const apikey = req.query.apikey;
 
   // Validasi API key
@@ -34,7 +33,7 @@ app.get('/imagecreator/brat/generator', async (req, res) => {
 
     encoder.start();
     encoder.setRepeat(0);
-    encoder.setDelay(speed === 'fast' ? 40 : speed === 'slow' ? 120 : 80);
+    encoder.setDelay(speed === 'fast' ? 40 : speed === 'slow' ? 120 : speed === 'medium' ? 80);
     encoder.setQuality(10);
 
     const canvas = createCanvas(width, height);
