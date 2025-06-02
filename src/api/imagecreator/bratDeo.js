@@ -1,95 +1,97 @@
-const { createCanvas, registerFont } = require('canvas');
+const { createCanvas } = require('canvas');
 const GIFEncoder = require('gifencoder');
-const path = require('path');
-const fs = require('fs');
-const ImageUploadService = require('node-upload-images');
 
-// Daftarkan font
-registerFont(path.join(__dirname, 'fonts', 'Arial.ttf'), { family: 'Arial' });
-
-module.exports = function (app) {
+module.exports = function(app) {
   app.get('/imagecreator/brat-generator', async (req, res) => {
-    const { text = 'Hello World', speed = 'normal', animated = 'false' } = req.query;
-    const width = 512;
-    const height = 512;
-
     try {
-      if (animated === 'true') {
-        // Buat animasi GIF
-        const encoder = new GIFEncoder(width, height);
-        const tmpPath = path.join(__dirname, `brat-${Date.now()}.gif`);
-        const fileStream = fs.createWriteStream(tmpPath);
+      const { text } = req.query;
+      if (!text) return res.status(400).send('Parameter `text` wajib diisi.');
 
-        encoder.createReadStream().pipe(fileStream);
-        encoder.start();
-        encoder.setRepeat(0);
-        encoder.setDelay(speed === 'fast' ? 40 : speed === 'slow' ? 120 : 80);
-        encoder.setQuality(10);
+      const width = 512;
+      const height = 512;
+      const margin = 20;
+      const wordSpacing = 50;
+      let fontSize = 80;
+      const lineHeightMultiplier = 1.3;
+      const frames = 6;
 
+      const encoder = new GIFEncoder(width, height);
+      encoder.start();
+      encoder.setRepeat(0);
+      encoder.setDelay(500);
+      encoder.setQuality(10);
+
+      for (let i = 0; i < frames; i++) {
         const canvas = createCanvas(width, height);
         const ctx = canvas.getContext('2d');
-        const frameCount = 30;
 
-        for (let i = 0; i < frameCount; i++) {
-          ctx.fillStyle = '#000000';
-          ctx.fillRect(0, 0, width, height);
+        ctx.fillStyle = 'white';
+        ctx.fillRect(0, 0, width, height);
 
-          ctx.fillStyle = '#ffffff';
-          ctx.font = 'bold 40px Arial';
+        ctx.font = `${fontSize}px Sans-serif`;
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'top';
+        ctx.fillStyle = i % 2 === 0 ? 'black' : '#333'; // blink
 
-          const textX = 30 + Math.sin(i * 0.3) * 20;
-          const textY = height / 2 + Math.cos(i * 0.3) * 20;
+        const words = text.split(' ');
+        let lines = [];
+        let currentLine = '';
 
-          ctx.fillText(text, textX, textY);
-          encoder.addFrame(ctx);
+        const rebuildLines = () => {
+          lines = [];
+          currentLine = '';
+          for (let word of words) {
+            let testLine = currentLine ? `${currentLine} ${word}` : word;
+            let lineWidth =
+              ctx.measureText(testLine).width +
+              (currentLine.split(' ').length - 1) * wordSpacing;
+            if (lineWidth < width - 2 * margin) {
+              currentLine = testLine;
+            } else {
+              lines.push(currentLine);
+              currentLine = word;
+            }
+          }
+          if (currentLine) lines.push(currentLine);
+        };
+
+        rebuildLines();
+
+        while (lines.length * fontSize * lineHeightMultiplier > height - 2 * margin) {
+          fontSize -= 2;
+          ctx.font = `${fontSize}px Sans-serif`;
+          rebuildLines();
         }
 
-        encoder.finish();
+        const lineHeight = fontSize * lineHeightMultiplier;
+        let y = margin;
 
-        fileStream.on('finish', async () => {
-          try {
-            const buffer = fs.readFileSync(tmpPath);
-            const service = new ImageUploadService('pixhost.to'); // ganti ke pibrary
-            const { directLink } = await service.uploadFromBinary(buffer, `brat-${Date.now()}.gif`);
-            fs.unlinkSync(tmpPath);
+        for (let line of lines) {
+          const wordsInLine = line.split(' ');
+          let x = margin;
 
-            res.status(200).json({
-              status: true,
-              animated: true,
-              type: 'gif',
-              result: directLink
-            });
-          } catch (err) {
-            console.error(err);
-            res.status(500).json({ status: false, message: 'Gagal upload ke Pibrary' });
+          for (let word of wordsInLine) {
+            ctx.fillText(word, x + Math.random() * 2, y + Math.random() * 2); // shake effect
+            x += ctx.measureText(word).width + wordSpacing;
           }
-        });
 
-      } else {
-        // Gambar statis PNG
-        const canvas = createCanvas(width, height);
-        const ctx = canvas.getContext('2d');
+          y += lineHeight;
+        }
 
-        ctx.fillStyle = '#000000';
-        ctx.fillRect(0, 0, width, height);
-        ctx.fillStyle = '#ffffff';
-        ctx.font = 'bold 40px Arial';
-        ctx.fillText(text, 30, height / 2);
-
-        const buffer = canvas.toBuffer('image/png');
-        const service = new ImageUploadService('pixhost.to'); // ganti ke pibrary
-        const { directLink } = await service.uploadFromBinary(buffer, `brat-${Date.now()}.png`);
-
-        res.status(200).json({
-          status: true,
-          animated: false,
-          type: 'png',
-          result: directLink
-        });
+        encoder.addFrame(ctx);
       }
+
+      encoder.finish();
+      const buffer = encoder.out.getData();
+
+      res.writeHead(200, {
+        'Content-Type': 'image/gif',
+        'Content-Length': buffer.length,
+      });
+      res.end(buffer);
     } catch (error) {
       console.error(error);
-      res.status(500).json({ status: false, message: error.message });
+      res.status(500).send(`Error: ${error.message}`);
     }
   });
 };
