@@ -12,9 +12,9 @@ const port = 3000;
 registerFont(path.join(__dirname, 'fonts', 'Arial.ttf'), { family: 'Arial' });
 
 app.get('/imagecreator/brat/generator', async (req, res) => {
-  const q = req.query.q || 'Hello World!';
-  const speed = req.query.speed || 'medium';
-  const animated = req.query.animated === 'true'; // Ganti dari isvideo ke animated
+  const { q } = req.query || 'Hello World!';
+  const { speed } = req.query || 'medium';
+  const { animated } = req.query === 'true'; // Ganti dari isvideo ke animated
  /* const apikey = req.query.apikey;
 
   // Validasi API key
