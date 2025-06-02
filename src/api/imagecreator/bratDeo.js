@@ -5,9 +5,9 @@ const fs = require('fs');
 const path = require('path');
 const ImageUploadService = require('node-upload-images');
 
-const app = express();
+/*const app = express();
 const port = 3000;
-
+*/
 // Register font (ganti dengan font favorit kamu, pastikan fontnya tersedia di folder fonts)
 registerFont(path.join(__dirname, 'fonts', 'Arial.ttf'), { family: 'Arial' });
 
@@ -121,7 +121,8 @@ app.get('/imagecreator/brat/generator', async (req, res) => {
     }
   }
 });
-
+/*
 app.listen(port, () => {
   console.log(`🚀 Server running at http://localhost:${port}`);
 });
+*/
