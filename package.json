@@ -5,23 +5,18 @@
   "main": "index.js",
   "type": "commonjs",
   "scripts": {
-  "start": "node --no-deprecation index.js",
-  "install": "npm install",
-  "preinstall": "echo 'Installing dependencies...'",
-  "postinstall": "echo 'Dependencies installed successfully!'"
-}, 
+    "start": "node --no-deprecation index.js"
+  },
   "author": "Skyzopedia",
   "license": "MIT",
   "dependencies": {
     "axios": "^1.6.8",
     "body-parser": "^1.20.3",
     "chalk": "^4.1.2",
-    "canvas": "^2.11.2",
     "cheerio": "^1.0.0",
     "cors": "^2.8.5",
     "express": "^4.19.2",
     "fs": "^0.0.1-security",
-    "gifencoder": "^2.0.1",
     "https": "^1.0.0",
     "node-fetch": "^2.6.1",
     "nodemon": "^3.1.9",
