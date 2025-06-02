@@ -1,27 +1,26 @@
-const GIFEncoder = require('gifencoder');
 const { createCanvas, registerFont } = require('canvas');
-const fs = require('fs');
+const GIFEncoder = require('gifencoder');
 const path = require('path');
+const fs = require('fs');
 const ImageUploadService = require('node-upload-images');
 
-// Register font (pastikan font ada di folder ./fonts)
+// Daftarkan font
 registerFont(path.join(__dirname, 'fonts', 'Arial.ttf'), { family: 'Arial' });
 
-module.exports = function app(app) {
+module.exports = function (app) {
   app.get('/imagecreator/brat-generator', async (req, res) => {
+    const { text = 'Hello World!', speed = 'medium', animated } = req.query;
+    const width = 512;
+    const height = 512;
+
     try {
-      const text = req.query.text || 'Hello World!';
-      const speed = req.query.speed || 'medium';
-      const animated = req.query.animated === 'true';
-
-      const width = 512;
-      const height = 512;
-
-      if (animated) {
+      if (animated === 'true') {
+        // Buat GIF animasi
         const encoder = new GIFEncoder(width, height);
         const tmpPath = path.join(__dirname, `brat-${Date.now()}.gif`);
         const stream = encoder.createWriteStream();
-        stream.pipe(fs.createWriteStream(tmpPath));
+        const fileStream = fs.createWriteStream(tmpPath);
+        stream.pipe(fileStream);
 
         encoder.start();
         encoder.setRepeat(0);
@@ -30,8 +29,8 @@ module.exports = function app(app) {
 
         const canvas = createCanvas(width, height);
         const ctx = canvas.getContext('2d');
-
         const frameCount = 30;
+
         for (let i = 0; i < frameCount; i++) {
           ctx.fillStyle = '#000000';
           ctx.fillRect(0, 0, width, height);
@@ -48,45 +47,49 @@ module.exports = function app(app) {
 
         encoder.finish();
 
-        stream.on('finish', async () => {
+        fileStream.on('finish', async () => {
           try {
-            const gifBuffer = fs.readFileSync(tmpPath);
-            fs.unlinkSync(tmpPath); // hapus file lokal
+            const buffer = fs.readFileSync(tmpPath);
+            const service = new ImageUploadService('pixhost.to');
+            const { directLink } = await service.uploadFromBinary(buffer, `brat-${Date.now()}.gif`);
+            fs.unlinkSync(tmpPath); // Hapus file setelah upload
 
-            res.writeHead(200, {
-              'Content-Type': 'image/gif',
-              'Content-Length': gifBuffer.length,
+            res.status(200).json({
+              status: true,
+              animated: true,
+              type: 'gif',
+              result: directLink
             });
-            res.end(gifBuffer);
           } catch (err) {
-            console.error('Gagal baca GIF:', err);
-            res.status(500).send('Gagal memproses GIF.');
+            console.error(err);
+            res.status(500).json({ status: false, message: 'Gagal upload ke PixHost' });
           }
         });
-
       } else {
-        // Gambar PNG statis
+        // Buat PNG statis
         const canvas = createCanvas(width, height);
         const ctx = canvas.getContext('2d');
 
         ctx.fillStyle = '#000000';
         ctx.fillRect(0, 0, width, height);
-
         ctx.fillStyle = '#ffffff';
         ctx.font = 'bold 40px Arial';
         ctx.fillText(text, 30, height / 2);
 
         const buffer = canvas.toBuffer('image/png');
+        const service = new ImageUploadService('pixhost.to');
+        const { directLink } = await service.uploadFromBinary(buffer, `brat-${Date.now()}.png`);
 
-        res.writeHead(200, {
-          'Content-Type': 'image/png',
-          'Content-Length': buffer.length,
+        res.status(200).json({
+          status: true,
+          animated: false,
+          type: 'png',
+          result: directLink
         });
-        res.end(buffer);
       }
     } catch (error) {
-      console.error('Terjadi kesalahan:', error);
-      res.status(500).send(`Error: ${error.message}`);
+      console.error(error);
+      res.status(500).json({ status: false, message: error.message });
     }
   });
 };
