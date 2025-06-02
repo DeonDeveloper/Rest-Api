@@ -9,8 +9,7 @@
   "install": "npm install",
   "preinstall": "echo 'Installing dependencies...'",
   "postinstall": "echo 'Dependencies installed successfully!'"
-}
-
+}, 
   "author": "Skyzopedia",
   "license": "MIT",
   "dependencies": {
