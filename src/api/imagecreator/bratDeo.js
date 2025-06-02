@@ -11,7 +11,7 @@ const port = 3000;
 // Register font (ganti dengan font favorit kamu, pastikan fontnya tersedia di folder fonts)
 registerFont(path.join(__dirname, 'fonts', 'Arial.ttf'), { family: 'Arial' });
 
-app.get('/imagecreator/brat/generator', async (req, res) => {
+app.get('/imagecreator/brat-generator', async (req, res) => {
   const { q, speed, animated} = req.query
 
  /* const apikey = req.query.apikey;
