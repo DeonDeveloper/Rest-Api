@@ -11,6 +11,7 @@ const port = 3000;
 // Register font (ganti dengan font favorit kamu, pastikan fontnya tersedia di folder fonts)
 registerFont(path.join(__dirname, 'fonts', 'Arial.ttf'), { family: 'Arial' });
 
+module.exports = function app (app) {
 app.get('/imagecreator/brat-generator', async (req, res) => {
   const { q, speed, animated} = req.query
 
@@ -121,6 +122,7 @@ app.get('/imagecreator/brat-generator', async (req, res) => {
     }
   }
 });
+}
 /*
 app.listen(port, () => {
   console.log(`🚀 Server running at http://localhost:${port}`);
