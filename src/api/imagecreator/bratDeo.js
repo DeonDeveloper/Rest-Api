@@ -9,19 +9,18 @@ registerFont(path.join(__dirname, 'fonts', 'Arial.ttf'), { family: 'Arial' });
 
 module.exports = function (app) {
   app.get('/imagecreator/brat-generator', async (req, res) => {
-    const { text , speed , animated } = req.query;
+    const { text = 'Hello World', speed = 'normal', animated = 'false' } = req.query;
     const width = 512;
     const height = 512;
 
     try {
       if (animated === 'true') {
-        // Buat GIF animasi
+        // Buat animasi GIF
         const encoder = new GIFEncoder(width, height);
         const tmpPath = path.join(__dirname, `brat-${Date.now()}.gif`);
-        const stream = encoder.createWriteStream();
         const fileStream = fs.createWriteStream(tmpPath);
-        stream.pipe(fileStream);
 
+        encoder.createReadStream().pipe(fileStream);
         encoder.start();
         encoder.setRepeat(0);
         encoder.setDelay(speed === 'fast' ? 40 : speed === 'slow' ? 120 : 80);
@@ -50,9 +49,9 @@ module.exports = function (app) {
         fileStream.on('finish', async () => {
           try {
             const buffer = fs.readFileSync(tmpPath);
-            const service = new ImageUploadService('pixhost.to');
+            const service = new ImageUploadService('pixhost.to'); // ganti ke pibrary
             const { directLink } = await service.uploadFromBinary(buffer, `brat-${Date.now()}.gif`);
-            fs.unlinkSync(tmpPath); // Hapus file setelah upload
+            fs.unlinkSync(tmpPath);
 
             res.status(200).json({
               status: true,
@@ -62,11 +61,12 @@ module.exports = function (app) {
             });
           } catch (err) {
             console.error(err);
-            res.status(500).json({ status: false, message: 'Gagal upload ke PixHost' });
+            res.status(500).json({ status: false, message: 'Gagal upload ke Pibrary' });
           }
         });
+
       } else {
-        // Buat PNG statis
+        // Gambar statis PNG
         const canvas = createCanvas(width, height);
         const ctx = canvas.getContext('2d');
 
@@ -77,7 +77,7 @@ module.exports = function (app) {
         ctx.fillText(text, 30, height / 2);
 
         const buffer = canvas.toBuffer('image/png');
-        const service = new ImageUploadService('pixhost.to');
+        const service = new ImageUploadService('pixhost.to'); // ganti ke pibrary
         const { directLink } = await service.uploadFromBinary(buffer, `brat-${Date.now()}.png`);
 
         res.status(200).json({
