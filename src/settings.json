@@ -353,7 +353,12 @@
           "name": "Brat",
           "desc": "Brat text generator",
           "path": "/imagecreator/brat?text="
-        }                                 
+        }, 
+        {
+          "name": "Brat",
+          "desc": "Brat text generator",
+          "path": "/imagecreator/brat/generator?text="
+        }
       ]
     }, 
     {
