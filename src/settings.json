@@ -355,7 +355,7 @@
           "path": "/imagecreator/brat?text="
         }, 
         {
-          "name": "Brat",
+          "name": "Brat 2",
           "desc": "Brat text generator",
           "path": "/imagecreator/brat/generator?q=&speed=&animated="
         }
