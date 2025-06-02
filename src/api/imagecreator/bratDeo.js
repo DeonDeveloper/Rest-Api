@@ -9,7 +9,7 @@ registerFont(path.join(__dirname, 'fonts', 'Arial.ttf'), { family: 'Arial' });
 
 module.exports = function (app) {
   app.get('/imagecreator/brat-generator', async (req, res) => {
-    const { text = 'Hello World!', speed = 'medium', animated } = req.query;
+    const { text , speed , animated } = req.query;
     const width = 512;
     const height = 512;
 
