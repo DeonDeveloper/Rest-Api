@@ -1,7 +1,7 @@
 const puppeteer = require('puppeteer');
 
 module.exports = function(app) {
-  app.get('/api/stalk/mlbb-moba', async (req, res) => {
+  app.get('/stalk/mlbb-moba', async (req, res) => {
     const { userId, zoneId } = req.query;
 
     if (!userId || !zoneId) {
