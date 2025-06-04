@@ -307,7 +307,7 @@ async function getMLFirstTopup(userId, zoneId) {
       ?.filter(item => item.label?.caption === '首充商品角标')
       ?.map(item => ({
         title: item.title,
-        denom: !item.goods_limit.reached_limit ? '✅' : '❌'
+        status: !item.goods_limit.reached_limit ? '✅' : '❌'
       })) || [];
 
     return {
