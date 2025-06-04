@@ -6,7 +6,6 @@ const path = require('path');
 require("./function.js")
 
 const app = express();
-require('./src/api/stalk/cekml3.js')(app);
 const PORT = process.env.PORT || 3000;
 
 app.enable("trust proxy");
