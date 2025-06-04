@@ -306,8 +306,8 @@ async function getMLFirstTopup(userId, zoneId) {
     const first_recharge2 = data.data.shop_info?.shelf_location?.[0]?.goods
       ?.filter(item => item.label?.caption === '首充商品角标')
       ?.map(item => ({
-        title: item.title,
-        status: !item.goods_limit.reached_limit ? '✅' : '❌'
+        name: item.title,
+        status: !item.goods_limit.reached_limit ? '✅ Tersedia' : '❌ Tidak Tersedia'
       })) || [];
 
     return {
@@ -354,7 +354,10 @@ module.exports = function (app) {
         username,
         country: countryFull,
         country_flag: flagEmoji,
-        firstTopup: result2.success ? result2.firstTopup : []
+        first_topup: {
+            title: "First Topup Packages",
+            packages: result2.success ? result2.firstTopup : []
+        }
       });
     } catch (error) {
       console.error('Internal error:', error);
