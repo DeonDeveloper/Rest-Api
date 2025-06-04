@@ -291,9 +291,6 @@ async function validateMobileLegendsGopay(userId, zoneId) {
   }
 }
 
-const axios = require('axios');
-
-async function getMLFirstTopup(userId, zoneId) {
 async function getMLFirstTopup(userId, zoneId) {
     try {
         const { data } = await axios.get('https://api.mobapay.com/api/app_shop', {
