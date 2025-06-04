@@ -294,6 +294,7 @@ async function validateMobileLegendsGopay(userId, zoneId) {
 const axios = require('axios');
 
 async function getMLFirstTopup(userId, zoneId) {
+async function getMLFirstTopup(userId, zoneId) {
     try {
         const { data } = await axios.get('https://api.mobapay.com/api/app_shop', {
             headers: { 'content-type': 'application/json' },
@@ -307,13 +308,13 @@ async function getMLFirstTopup(userId, zoneId) {
             }
         });
 
-        const first_recharge = data.data.shop_info.good_list.filter(item => item.label?.caption === '首充商品角标')
+        const first_recharge = data.data.shop_info?.good_list?.filter(item => item.label?.caption === '首充商品角标')
             .map(item => ({
                 title: item.title,
                 available: !item.goods_limit.reached_limit
-            }));
+            })) || [];
 
-        const first_recharge2 = data.data.shop_info.shelf_location?.[0]?.goods.filter(item => item.label?.caption === '首充商品角标')
+        const first_recharge2 = data.data.shop_info?.shelf_location?.[0]?.goods?.filter(item => item.label?.caption === '首充商品角标')
             .map(item => ({
                 title: item.title,
                 available: !item.goods_limit.reached_limit
@@ -321,11 +322,11 @@ async function getMLFirstTopup(userId, zoneId) {
 
         return {
             success: true,
-            username: data.data.user_info.user_name,
+            username: data.data.user_info?.user_name || 'Unknown',
             firstTopup: first_recharge2
         };
     } catch (error) {
-        console.error(error.message);
+        console.error('Error saat request MobaPay:', error.response?.data || error.message || error);
         return {
             success: false,
             message: 'Tidak dapat mengambil data',
@@ -333,6 +334,7 @@ async function getMLFirstTopup(userId, zoneId) {
         };
     }
 }
+
 
 
 module.exports = function (app) {
@@ -362,7 +364,7 @@ module.exports = function (app) {
         username,
         country: countryFull,
         country_flag: flagEmoji,
-        firstTopup: result2.firstTopup
+        firstTopup: result2.success ? result2.firstTopup : []
       });
     } catch (error) {
       return res.status(500).json({
