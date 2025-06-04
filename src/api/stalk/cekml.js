@@ -362,7 +362,7 @@ module.exports = function (app) {
         username,
         country: countryFull,
         country_flag: flagEmoji,
-        firstTopup: result2.success ? result2.firstTopup : null
+        firstTopup: result2.firstTopup : null
       });
     } catch (error) {
       return res.status(500).json({
