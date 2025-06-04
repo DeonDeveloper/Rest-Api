@@ -263,10 +263,7 @@ async function validateMobileLegendsGopay(userId, zoneId) {
   const url = 'https://gopay.co.id/games/v1/order/user-account';
   const payload = {
     code: 'MOBILE_LEGENDS',
-    data: {
-      userId,
-      zoneId
-    }
+    data: { userId, zoneId }
   };
 
   try {
@@ -292,54 +289,49 @@ async function validateMobileLegendsGopay(userId, zoneId) {
 }
 
 async function getMLFirstTopup(userId, zoneId) {
-    try {
-        const { data } = await axios.get('https://api.mobapay.com/api/app_shop', {
-            headers: { 'content-type': 'application/json' },
-            params: {
-                app_id: 100000,
-                game_user_key: userId,
-                game_server_key: zoneId,
-                country: 'ID',
-                language: 'en',
-                shop_id: 1001
-            }
-        });
+  try {
+    const { data } = await axios.get('https://api.mobapay.com/api/app_shop', {
+      headers: { 'content-type': 'application/json' },
+      params: {
+        app_id: 100000,
+        game_user_key: userId,
+        game_server_key: zoneId,
+        country: 'ID',
+        language: 'en',
+        shop_id: 1001
+      }
+    });
 
-        const first_recharge = data.data.shop_info?.good_list?.filter(item => item.label?.caption === '首充商品角标')
-            .map(item => ({
-                title: item.title,
-                available: !item.goods_limit.reached_limit
-            })) || [];
+    // Filter first topup hanya dari shelf_location[0].goods
+    const first_recharge2 = data.data.shop_info?.shelf_location?.[0]?.goods
+      ?.filter(item => item.label?.caption === '首充商品角标')
+      ?.map(item => ({
+        title: item.title,
+        available: !item.goods_limit.reached_limit
+      })) || [];
 
-        const first_recharge2 = data.data.shop_info?.shelf_location?.[0]?.goods?.filter(item => item.label?.caption === '首充商品角标')
-            .map(item => ({
-                title: item.title,
-                available: !item.goods_limit.reached_limit
-            })) || [];
-
-        return {
-            success: true,
-            username: data.data.user_info?.user_name || 'Unknown',
-            firstTopup: first_recharge2
-        };
-    } catch (error) {
-        console.error('Error saat request MobaPay:', error.response?.data || error.message || error);
-        return {
-            success: false,
-            message: 'Tidak dapat mengambil data',
-            error: error.message
-        };
-    }
+    return {
+      success: true,
+      username: data.data.user_info?.user_name || 'Unknown',
+      firstTopup: first_recharge2
+    };
+  } catch (error) {
+    console.error('Error saat request MobaPay:', error.response?.data || error.message || error);
+    return {
+      success: false,
+      message: 'Tidak dapat mengambil data',
+      error: error.message
+    };
+  }
 }
-
-
 
 module.exports = function (app) {
   app.get('/stalk/mlbb-first', async (req, res) => {
     const { apikey, userId, zoneId } = req.query;
-    const check = global.apikey
-    if (!global.apikey.includes(apikey)) return res.json("Apikey tidak valid.")
 
+    if (!global.apikey || !global.apikey.includes(apikey)) {
+      return res.json({ status: false, message: "Apikey tidak valid." });
+    }
 
     if (!userId || !zoneId) {
       return res.status(400).json({ status: false, message: 'Parameter userId dan zoneId harus diisi.' });
@@ -349,11 +341,12 @@ module.exports = function (app) {
       const result = await validateMobileLegendsGopay(userId, zoneId);
       const result2 = await getMLFirstTopup(userId, zoneId);
 
-      const data = result.data || {};
+      // Pastikan result.data ada dan sesuai struktur
+      const data = result && result.data ? result.data : {};
       const username = data.username || 'Tidak ditemukan';
       const countryCode = (data.countryOrigin || '').toUpperCase();
       const countryFull = mooCountry(countryCode);
-      // Cari emoji bendera, fallback ke kosong jika tidak ada
+      // Cari emoji bendera dengan regex unicode flag, fallback ke ''
       const flagEmoji = countryFull.match(/[\u{1F1E6}-\u{1F1FF}]{2}/u)?.[0] || '';
 
       return res.status(200).json({
@@ -364,10 +357,11 @@ module.exports = function (app) {
         firstTopup: result2.success ? result2.firstTopup : []
       });
     } catch (error) {
+      console.error('Internal error:', error);
       return res.status(500).json({
         status: false,
         message: 'Internal server error',
-        error: error.message,
+        error: error.message
       });
     }
   });
