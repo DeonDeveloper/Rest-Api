@@ -1,4 +1,5 @@
 const fetch = require('node-fetch');
+const axios = require('axios');
 
 // Fungsi untuk mengonversi kode negara ke nama lengkap dengan bendera
 const mooCountry = (value) => {
@@ -290,24 +291,49 @@ async function validateMobileLegendsGopay(userId, zoneId) {
   }
 }
 
+const axios = require('axios');
+
 async function getMLFirstTopup(userId, zoneId) {
-  try {
-    const url = `https://api.hamsoffc.me/stalk/ml-first-topup?apikey=HAMS-c2b941909b5e&id=${userId}&zoneId=${zoneId}`;
-    const res = await fetch(url);
-    if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-    const json = await res.json();
+    try {
+        const { data } = await axios.get('https://api.mobapay.com/api/app_shop', {
+            headers: { 'content-type': 'application/json' },
+            params: {
+                app_id: 100000,
+                game_user_key: userId,
+                game_server_key: zoneId,
+                country: 'ID',
+                language: 'en',
+                shop_id: 1001
+            }
+        });
 
-    const firstTopup = json?.result?.first_topup;
+        const first_recharge = data.data.shop_info.good_list.filter(item => item.label?.caption === '首充商品角标')
+            .map(item => ({
+                title: item.title,
+                available: !item.goods_limit.reached_limit
+            }));
 
-    if (!firstTopup) {
-      return { success: false, message: 'Data first_topup tidak tersedia.' };
+        const first_recharge2 = data.data.shop_info.shelf_location?.[0]?.goods.filter(item => item.label?.caption === '首充商品角标')
+            .map(item => ({
+                title: item.title,
+                available: !item.goods_limit.reached_limit
+            })) || [];
+
+        return {
+            success: true,
+            username: data.data.user_info.user_name,
+            firstTopup: first_recharge2
+        };
+    } catch (error) {
+        console.error(error.message);
+        return {
+            success: false,
+            message: 'Tidak dapat mengambil data',
+            error: error.message
+        };
     }
-
-    return { success: true, firstTopup };
-  } catch (error) {
-    return { success: false, message: 'Gagal memeriksa status first topup.', error: error.message };
-  }
 }
+
 
 module.exports = function (app) {
   app.get('/stalk/mlbb-first', async (req, res) => {
