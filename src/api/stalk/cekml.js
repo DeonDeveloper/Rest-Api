@@ -354,7 +354,7 @@ module.exports = function (app) {
         username,
         country: countryFull,
         country_flag: flagEmoji,
-        first_topup: {
+        firstTopup: {
             title: "First Topup Packages",
             packages: result2.success ? result2.firstTopup : []
         }
