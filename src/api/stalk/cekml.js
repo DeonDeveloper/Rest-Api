@@ -367,7 +367,7 @@ module.exports = function (app) {
         firstTopup: {
             title: "First Topup Packages",
             packages: result2.success ? result2.firstTopup2 : [], 
-            packages2: result2.success ? result2.firstRopup : []
+            packages2: result2.success ? result2.firstTopup : []
         }
       });
     } catch (error) {
