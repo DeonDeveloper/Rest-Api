@@ -321,7 +321,8 @@ async function getMLFirstTopup(userId, zoneId) {
     return {
       success: true,
       username: data.data.user_info?.user_name || 'Unknown',
-      firstTopup: [...firstTopup1, ...firstTopup2]
+      firstTopup: firstTopup1, 
+      firatTopup2: firstTopup2
     };
   } catch (error) {
     console.error('Error saat request:', error.response?.data || error.message || error);
@@ -365,7 +366,8 @@ module.exports = function (app) {
         country_flag: flagEmoji,
         firstTopup: {
             title: "First Topup Packages",
-            packages: result2.success ? result2.firstTopup : []            
+            packages: result2.success ? result2.firstTopup2 : [], 
+            packages: result2.success ? result2.firstTopup : []
         }
       });
     } catch (error) {
