@@ -322,7 +322,7 @@ async function getMLFirstTopup(userId, zoneId) {
       success: true,
       username: data.data.user_info?.user_name || 'Unknown',
       firstTopup: firstTopup1, 
-      firatTopup2: firstTopup2
+      firstTopup2: firstTopup2
     };
   } catch (error) {
     console.error('Error saat request:', error.response?.data || error.message || error);
