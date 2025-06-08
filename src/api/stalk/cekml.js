@@ -299,24 +299,33 @@ async function getMLFirstTopup(userId, zoneId) {
         country: 'ID',
         language: 'en',
         shop_id: 1001
-      }
+      }    
     });
 
-    // Filter first topup hanya dari shelf_location[0].goods
-    const first_recharge2 = data.data.shop_info?.shelf_location?.[0]?.goods
+    // First recharge dari good_list
+    const firstTopup1 = data.data.shop_info?.good_list
       ?.filter(item => item.label?.caption === '首充商品角标')
       ?.map(item => ({
-        name: item.title,
-        status: !item.goods_limit.reached_limit ? '✅ Tersedia' : '❌ Tidak Tersedia'
+        title: item.title,
+        status: !item.goods_limit?.reached_limit ? '✅ Tersedia' : '❌ Tidak Tersedia'
+      })) || [];
+
+    // First recharge dari shelf_location[0].goods
+    const firstTopup2 = data.data.shop_info?.shelf_location?.[0]?.goods
+      ?.filter(item => item.label?.caption === '首充商品角标')
+      ?.map(item => ({
+        title: item.title,
+        status: !item.goods_limit?.reached_limit ? '✅ Tersedia' : '❌ Tidak Tersedia'
       })) || [];
 
     return {
       success: true,
       username: data.data.user_info?.user_name || 'Unknown',
-      firstTopup: first_recharge2
+      firstTopup: firstTopup1,
+      firstTopup2: firstTopup2
     };
   } catch (error) {
-    console.error('Error saat request MobaPay:', error.response?.data || error.message || error);
+    console.error('Error saat request:', error.response?.data || error.message || error);
     return {
       success: false,
       message: 'Tidak dapat mengambil data',
@@ -324,6 +333,7 @@ async function getMLFirstTopup(userId, zoneId) {
     };
   }
 }
+
 
 module.exports = function (app) {
   app.get('/stalk/mlbb-first', async (req, res) => {
@@ -356,7 +366,8 @@ module.exports = function (app) {
         country_flag: flagEmoji,
         firstTopup: {
             title: "First Topup Packages",
-            packages: result2.success ? result2.firstTopup : []
+            packages: result2.success ? result2.firstTopup2 : [], 
+            packages2: result2.success ? result2.firstRopup : []
         }
       });
     } catch (error) {
