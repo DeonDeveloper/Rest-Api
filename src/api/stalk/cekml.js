@@ -306,7 +306,7 @@ async function getMLFirstTopup(userId, zoneId) {
     const firstTopup1 = data.data.shop_info?.good_list
       ?.filter(item => item.label?.caption === '首充商品角标')
       ?.map(item => ({
-        title: item.title,
+        name: item.title,
         status: !item.goods_limit?.reached_limit ? '✅ Tersedia' : '❌ Tidak Tersedia'
       })) || [];
 
@@ -314,7 +314,7 @@ async function getMLFirstTopup(userId, zoneId) {
     const firstTopup2 = data.data.shop_info?.shelf_location?.[0]?.goods
       ?.filter(item => item.label?.caption === '首充商品角标')
       ?.map(item => ({
-        title: item.title,
+        name: item.title,
         status: !item.goods_limit?.reached_limit ? '✅ Tersedia' : '❌ Tidak Tersedia'
       })) || [];
 
