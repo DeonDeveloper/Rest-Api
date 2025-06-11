@@ -352,7 +352,7 @@ module.exports = function (app) {
       const result2 = await getMLFirstTopup(userId, zoneId);
 
       // Pastikan result.data ada dan sesuai struktur
-      const data = result && result.data ? result.data : {};
+      const data = result.data
       const username = data.username || 'Tidak ditemukan';
       const countryCode = (data.countryOrigin || '').toUpperCase();
       const countryFull = mooCountry(countryCode);
