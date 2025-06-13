@@ -361,7 +361,7 @@ module.exports = function (app) {
 
       return res.status(200).json({
         status: true,
-        username,
+        username: result2.success ? result2.username : [], 
         country: countryFull,
         country_flag: flagEmoji,
         firstTopup: {
