@@ -1,7 +1,8 @@
 body {
     font-family: 'Poppins', sans-serif;
-    color: #4B4B4B;
+    color: #333;
     padding: 25px 30px;
+    background: linear-gradient(to bottom right, #f8f9fa, #ffffff);
 }
 
 body.no-scroll {
@@ -9,22 +10,26 @@ body.no-scroll {
 }
 
 .navbar {
-    background-color: white;
-    padding: 10px 10px;
+    background: #ffffff;
+    padding: 15px 20px;
     position: fixed;
     top: -30vh;
     left: 0;
     right: 0;
     z-index: 100;
-    transition: box-shadow 0.3s ease;
+    border-bottom: 1px solid #eee;
+    transition: box-shadow 0.3s ease, background-color 0.3s ease;
 }
 
 .navbar.scrolled {
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+    background-color: #fefefe;
 }
 
 .navbar-brand {
-    color: #333;
+    color: #6C63FF;
+    font-weight: bold;
+    font-size: 1.3rem;
     opacity: 0;
     transform: translateY(-10px);
     transition: opacity 0.3s ease, transform 0.3s ease;
@@ -41,50 +46,50 @@ body.no-scroll {
 }
 
 .spinner-border.custom-spinner {
-    color: #333;
+    color: #6C63FF;
 }
 
 .modal-content {
-    padding: 10px;
+    padding: 15px;
+    border-radius: 10px;
+    border: none;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
 }
 
 .modal-dialog {
-    margin: 20px;
+    margin: 30px;
     max-width: 100%;
     max-height: 80vh;
 }
-
-
-@keyframes op {
-0% { opacity: .2; }
-100% { opacity: 1; }
-}
-
-
-#versionHeader {
-animation: op 0.8s infinite alternate;
-}
-
 
 .modal-body {
     max-height: 60vh;
     overflow-y: auto;
 }
 
-#apiQueryInputContainer input, #searchInput {
-    transition: outline 0.3s ease;
+#apiQueryInputContainer input,
+#searchInput {
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    padding: 8px 12px;
+    transition: outline 0.3s ease, border 0.3s ease;
 }
 
-#apiQueryInputContainer input:focus, #searchInput:focus {
-    outline: 3px solid #333 !important;
-    border: none;
-    box-shadow: none;
+#apiQueryInputContainer input:focus,
+#searchInput:focus {
+    outline: none;
+    border-color: #6C63FF;
+    box-shadow: 0 0 0 0.2rem rgba(108, 99, 255, 0.2);
 }
 
-#apiResponseContent, #apiEndpoint {
-    font-family: monospace;
+#apiResponseContent,
+#apiEndpoint {
+    font-family: 'Courier New', monospace;
     white-space: pre-wrap;
     word-wrap: break-word;
+    background: #f1f1f1;
+    padding: 10px;
+    border-radius: 8px;
 }
 
 #apiResponseContent::-webkit-scrollbar {
@@ -93,9 +98,15 @@ animation: op 0.8s infinite alternate;
 
 #apiLinks a {
     display: block;
-    color: rgba(0, 0, 0, 0.8);
+    color: #4d83e8;
+    text-decoration: none;
+    margin-bottom: 0.5rem;
+    transition: color 0.2s;
+}
+
+#apiLinks a:hover {
+    color: #f67280;
     text-decoration: underline;
-    margin-bottom: 0.3rem;
 }
 
 #loadingScreen {
@@ -104,13 +115,16 @@ animation: op 0.8s infinite alternate;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: white;
+    background-color: #ffffff;
     z-index: 9999;
     display: flex;
     justify-content: center;
     align-items: center;
     flex-direction: column;
-    font-family: 'Poppins', sans-serif;
+}
+
+.spinner-wrapper {
+    text-align: center;
 }
 
 #nameContainer {
@@ -121,9 +135,9 @@ animation: op 0.8s infinite alternate;
 }
 
 @keyframes colorChange {
-    0% { color: purple; }
-    50% { color: #4d83e8; }
-    100% { color: rgba(0, 0, 0, 0.7); }
+    0% { color: #6C63FF; }
+    50% { color: #f67280; }
+    100% { color: #FFD369; }
 }
 
 #name {
@@ -131,11 +145,11 @@ animation: op 0.8s infinite alternate;
     line-height: 1;
     font-weight: 600;
     z-index: 2;
-    animation: colorChange 10s infinite alternate;
+    animation: colorChange 8s infinite alternate;
 }
 
 #version {
-    background-color: #333;
+    background-color: #6C63FF;
     color: white;
     padding: 5px 12px;
     font-size: 11px;
@@ -143,19 +157,15 @@ animation: op 0.8s infinite alternate;
     white-space: nowrap;
 }
 
-.spinner-wrapper {
-    text-align: center;
-}
-
 .hero-section {
-    padding: 20px 25px;
-    background-color: #F8F9FA;
+    padding: 25px;
+    background: linear-gradient(135deg, #fdfbfb, #ebedee);
     color: #333;
-    border-radius: 10px;
-    height: 80px;
+    border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: space-between;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
 }
 
 .hero-section > div {
@@ -163,7 +173,8 @@ animation: op 0.8s infinite alternate;
 }
 
 .hero-section .text-muted {
-    font-size: 0.8rem;
+    font-size: 0.85rem;
+    color: #777;
     overflow: hidden;
     text-overflow: ellipsis;
     display: -webkit-box;
@@ -173,30 +184,43 @@ animation: op 0.8s infinite alternate;
 }
 
 .lead {
-    font-size: 15px;
-    color: #666;
+    font-size: 16px;
+    color: #444;
 }
 
 .btn-dark {
-    background-color: #333;
+    background-color: #6C63FF;
     color: #fff;
     border: none;
     border-radius: 10px;
-    padding: 8px 18px;
+    padding: 10px 20px;
+    transition: background-color 0.3s;
 }
 
+.btn-dark:hover {
+    background-color: #4d4acb;
+}
 
 .form-control.is-invalid {
     border-color: #dc3545;
-    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc3545'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23dc3545' stroke='none'/%3e%3c/svg%3e");
+    background-image: url("data:image/svg+xml,...");
     background-repeat: no-repeat;
-    background-position: right calc(0.375em + 0.1875rem) center;
-    background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+    background-position: right 0.75rem center;
+    background-size: 1.25rem 1.25rem;
 }
 
 .param-container .form-control:focus {
-    border-color: #333;
-    box-shadow: 0 0 0 0.25rem rgba(51, 51, 51, 0.25);
+    border-color: #6C63FF;
+    box-shadow: 0 0 0 0.25rem rgba(108, 99, 255, 0.25);
+}
+
+@keyframes op {
+    0% { opacity: .2; }
+    100% { opacity: 1; }
+}
+
+#versionHeader {
+    animation: op 0.8s infinite alternate;
 }
 
 @media screen and (min-width: 768px) {
