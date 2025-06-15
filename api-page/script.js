@@ -345,9 +345,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         const currentYear = new Date().getFullYear();
         const creator = settings.apiSettings?.creator || 'FlowFalcon';
 
-        setPageContent(DOM.pageTitle, settings.name, "Falcon API");
+        setPageContent(DOM.pageTitle, settings.name, "Deoberon API");
         setPageContent(DOM.wm, `© ${currentYear} ${creator}. Semua hak dilindungi.`);
-        setPageContent(DOM.appName, settings.name, "Falcon API");
+        setPageContent(DOM.appName, settings.name, "Deoberon API");
         setPageContent(DOM.sideNavName, settings.name || "API");
         setPageContent(DOM.versionBadge, settings.version, "v1.0");
         setPageContent(DOM.versionHeaderBadge, settings.header?.status, "Aktif!");
