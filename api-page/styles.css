@@ -1053,3 +1053,15 @@ input:checked + .slider:before { transform: translateX(26px); }
 .slide-in-bottom {
     animation: slideInUp 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
 }
+
+.highlight-section {
+    background: linear-gradient(145deg, #0f0f1c, #151525);
+    color: white;
+}
+.gradient-text {
+    background: linear-gradient(90deg, #7F56D9, #00C6FF);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+
