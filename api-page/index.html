@@ -215,12 +215,58 @@
     <script>
 const kodeList = [
     {
-        title: "Fade In CSS",
-        language: "css",
-        content: `@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}`
+        title: "Fitur stalk mobile legends",
+        language: "node.js",
+        content: `case 'idml5': {
+ if (args.length < 2) {
+ return m.reply('Masukan user ID dan zone ID\nContoh: idml5 409094931 9837');
+ }
+
+ const userId = args[0];
+ const zoneId = args[1];
+ const url = `https://deoberon-api.vercel.app/stalk/mlbb-first?apikey=${belidiowner}&userId=${userId}&zoneId=${zoneId}`;
+
+ fetch(url)
+ .then(response => {
+ if (!response.ok) {
+ throw new Error(`HTTP error! status: ${response.status}`);
+ }
+ return response.json();
+ })
+ .then(data => {
+ if (!data.status) {
+ return m.reply('User tidak ditemukan atau response gagal.');
+ }
+
+ const username = data.username || 'Tidak ditemukan';
+ const country = data.country || 'Tidak diketahui';
+ const firstTopup = data.firstTopup;
+
+ let teks = `✅ *Hasil Stalk MLBB:*\n\n`;
+ teks += `*Username:* ${username}\n`;
+ teks += `*Negara:* ${country}\n\n`;
+
+ if (firstTopup?.packages?.length) {
+ teks += `*${firstTopup.title}:*\n`;
+ teks += `Packages 1\n`;
+ for (const pack of firstTopup.packages2) {
+ teks += `- ${pack.name}: ${pack.status}\n`;
+ }
+teks += `Packages 2\n`;
+ for (const pack of firstTopup.packages) {
+ teks += `- ${pack.name}: ${pack.status}\n`;
+ }
+ } else {
+ teks += `Tidak ada data First Topup.`;
+ }
+
+ m.reply(teks.trim());
+ })
+ .catch(error => {
+ m.reply(`Terjadi kesalahan: ${error.message}`);
+ });
+}
+ break`
     },
     {
         title: "React Counter",
