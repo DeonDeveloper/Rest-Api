@@ -43,11 +43,7 @@
             <a href="#apis" class="side-nav-link">
                 <i class="fas fa-plug" aria-hidden="true"></i>
                 <span>API</span>
-            </a>
-            <a href="#codeshare" class="side-nav-link">
-        <i class="fas fa-code" aria-hidden="true"></i>
-        <span>Kode</span>
-            </a>
+            </a>            
         </nav>
         
         <button class="nav-collapse-btn" aria-label="Alihkan navigasi" aria-expanded="false" aria-controls="sideNavigation">
@@ -106,16 +102,7 @@
                 
                 <div class="tab-content" id="apiContent">
                     </div>
-            </section>
-            <section id="codeshare" class="code-section" aria-labelledby="codeSectionTitle">
-    <h2 id="codeSectionTitle" class="section-title">Share Kode</h2>
-    <p class="section-description">Kumpulan snippet yang bisa kamu gunakan ulang, seperti React, CSS animation, atau script JavaScript umum.</p>
-    
-    <div id="codeListContainer" class="code-list">
-        <!-- Snippet akan muncul di sini -->
-    </div>
-</section>
-
+            </section>           
         </main>
         
         <footer class="main-footer" role="contentinfo">
@@ -212,74 +199,7 @@
         </div>
     </div>
 
-    <script>
-const kodeList = [
-    {
-        title: "Fitur remini",
-        language: "node.js",
-        content: `case 'hdr2': {
-if (!/image/.test(mime)) {
-        return m.reply('*PERMINTAAN ERROR!! PESAN :*\n> *Reply/Send Gambar Dengan Caption .remini*');
-    }
-    if (!quoted) {
-        return m.reply('*PERMINTAAN ERROR!! PESAN :*\n> *Reply/Send Gambar Dengan Caption .remini*);
-    }
-    m.reply('sabar sedang proses..');
-    let media = await lenwy.downloadAndSaveMediaMessage(quoted);
-    let anu = await imgbb(imgbbapi, media)
-    let gas = await (await fetch(https://deoberon-api.vercel.app/imagecreator/remini?url=${anu.display_url})).json();
-    let final = gas.result;
-    lenwy.sendMessage(m.chat, { image: { url: final }, caption: '*SUCCESS ✅*'}, { quoted: m})
-}
-break`
-    },
-    {
-        title: "React Counter",
-        language: "jsx",
-        content: `import React, { useState } from "react";
-function Counter() {
-  const [count, setCount] = useState(0);
-  return <button onClick={() => setCount(count + 1)}>Count: {count}</button>;
-}`
-    },
-    {
-        title: "JavaScript Debounce",
-        language: "js",
-        content: `function debounce(func, delay) {
-  let timer;
-  return function(...args) {
-    clearTimeout(timer);
-    timer = setTimeout(() => func.apply(this, args), delay);
-  };
-}`
-    }
-];
-
-function renderCodeList() {
-    const container = document.getElementById("codeListContainer");
-    kodeList.forEach(snippet => {
-        const card = document.createElement("div");
-        card.className = "code-card";
-
-        card.innerHTML = `
-            <h3>${snippet.title}</h3>
-            <button class="copy-btn" title="Salin"><i class="fas fa-copy"></i></button>
-            <pre><code>${snippet.content}</code></pre>
-        `;
-
-        card.querySelector('.copy-btn').addEventListener('click', () => {
-            navigator.clipboard.writeText(snippet.content);
-            alert('Kode disalin!');
-        });
-
-        container.appendChild(card);
-    });
-}
-
-document.addEventListener("DOMContentLoaded", renderCodeList);
-</script>
-
-
+    
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script src="/script.js"></script> </body>
