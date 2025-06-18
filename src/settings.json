@@ -353,6 +353,11 @@
           "name": "Brat",
           "desc": "Brat text generator",
           "path": "/imagecreator/brat?text="
+        }, 
+        {
+          "name": "Qc",
+          "desc": "Qc text generator",
+          "path": "/imagecreator/qc?text=&name=&avatar="
         }
       ]
     }, 
