@@ -323,6 +323,24 @@
           "desc": "Stalk free fire account",
           "path": "/stalk/ff?apikey=&id=", 
           "innerDesc": "Buy apikey >> wa.me/6285784856257"
+        }, 
+        {
+          "name": "Supersus Stalk",
+          "desc": "Stalk supersus account",
+          "path": "/stalk/supersus?apikey=&id=", 
+          "innerDesc": "Buy apikey >> wa.me/6285784856257"
+        }, 
+        {
+          "name": "Pubg Stalk",
+          "desc": "Stalk pubg account",
+          "path": "/stalk/pubg?apikey=&id=", 
+          "innerDesc": "Buy apikey >> wa.me/6285784856257"
+        }, 
+        {
+          "name": "Honor of Kings Stalk",
+          "desc": "Stalk Hok account",
+          "path": "/stalk/hok?apikey=&id=", 
+          "innerDesc": "Buy apikey >> wa.me/6285784856257"
         }
       ]
     },
