@@ -3,9 +3,11 @@ const fetch = require('node-fetch');
 module.exports = function (app) {
   app.get('/stalk/supersus', async (req, res) => {
     try {
-      const { id } = req.query;
+      const { apikey, id } = req.query;
       if (!id) return res.status(400).json({ error: 'Parameter "id" wajib diisi' });
-
+      const check = global.apikey
+      if (!global.apikey.includes(apikey)) return res.json("Apikey tidak valid.")
+      
       const url = `https://api.vocagame.com/v1/order/prepare/SUPER_SUS?userId=${id}&zoneId=undefined`;
       const response = await fetch(url);
       const data = await response.json();
@@ -22,8 +24,10 @@ module.exports = function (app) {
 
   app.get('/stalk/hok', async (req, res) => {
     try {
-      const { id } = req.query;
+      const { apikey, id } = req.query;
       if (!id) return res.status(400).json({ error: 'Parameter "id" wajib diisi' });
+      const check = global.apikey
+      if (!global.apikey.includes(apikey)) return res.json("Apikey tidak valid.")
 
       const url = `https://api.vocagame.com/v1/order/prepare/HOK?userId=${id}&zoneId=undefined`;
       const response = await fetch(url);
@@ -41,9 +45,12 @@ module.exports = function (app) {
 
   app.get('/stalk/pubg', async (req, res) => {
     try {
-      const { id } = req.query;
+      const { apikey, id } = req.query;
       if (!id) return res.status(400).json({ error: 'Parameter "id" wajib diisi' });
+      const check = global.apikey
+      if (!global.apikey.includes(apikey)) return res.json("Apikey tidak valid.")
 
+      
       const url = `https://api.vocagame.com/v1/order/prepare/PUBGM?userId=${id}&zoneId=undefined`;
       const response = await fetch(url);
       const data = await response.json();
