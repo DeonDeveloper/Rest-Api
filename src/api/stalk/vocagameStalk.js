@@ -1,7 +1,7 @@
 const fetch = require('node-fetch');
 
 module.exports = function (app) {
-  app.get('/cek/supersus', async (req, res) => {
+  app.get('/stalk/supersus', async (req, res) => {
     try {
       const { id } = req.query;
       if (!id) return res.status(400).json({ error: 'Parameter "id" wajib diisi' });
@@ -20,7 +20,7 @@ module.exports = function (app) {
     }
   });
 
-  app.get('/cek/hok', async (req, res) => {
+  app.get('/stalk/hok', async (req, res) => {
     try {
       const { id } = req.query;
       if (!id) return res.status(400).json({ error: 'Parameter "id" wajib diisi' });
@@ -39,7 +39,7 @@ module.exports = function (app) {
     }
   });
 
-  app.get('/cek/pubg', async (req, res) => {
+  app.get('/stalk/pubg', async (req, res) => {
     try {
       const { id } = req.query;
       if (!id) return res.status(400).json({ error: 'Parameter "id" wajib diisi' });
