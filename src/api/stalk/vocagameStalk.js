@@ -13,7 +13,7 @@ module.exports = function (app) {
       const data = await response.json();
 
       if (data.message === 'Success') {
-        res.json({ id, nickname: data.data });
+        res.json({ status: true, id, nickname: data.data });
       } else {
         res.status(404).json({ error: 'Username tidak ditemukan' });
       }
@@ -34,7 +34,7 @@ module.exports = function (app) {
       const data = await response.json();
 
       if (data.message === 'Success') {
-        res.json({ id, nickname: data.data });
+        res.json({ status: true, id, nickname: data.data });
       } else {
         res.status(404).json({ error: 'Username tidak ditemukan' });
       }
@@ -56,7 +56,7 @@ module.exports = function (app) {
       const data = await response.json();
 
       if (data.message === 'Success') {
-        res.json({ id, nickname: data.data });
+        res.json({ status: true, id, nickname: data.data });
       } else {
         res.status(404).json({ error: 'Username tidak ditemukan' });
       }
