@@ -229,7 +229,7 @@
         {
           "name": "Pinterest",
           "desc": "Search foto pinterest",
-          "path": "/search/youtube?q="
+          "path": "/search/pinterest?q="
         }, 
         {
           "name": "Google Image",
