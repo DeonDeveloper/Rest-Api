@@ -1,4 +1,4 @@
-8const fetch = require('node-fetch');
+const fetch = require('node-fetch');
 const axios = require('axios');
 
 // Fungsi untuk mengonversi kode negara ke nama lengkap dengan bendera
@@ -284,7 +284,12 @@ async function stalkFreeFire(uid) {
     } = data;
 
     const convertEpochToDate = (epoch) => new Date(parseInt(epoch) * 1000).toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' });
-   
+
+   // Ubah region code ke nama lengkap dan ambil emoji bendera
+    const regionCode = (AccountInfo.AccountRegion || '').toUpperCase();
+    const regionFull = mooCountry(regionCode);
+    const flagEmoji = regionFull.match(/[\u{1F1E6}-\u{1F1FF}]{2}/u)?.[0] || '';
+    
     return {
       status: true,
       uid,
@@ -292,7 +297,8 @@ async function stalkFreeFire(uid) {
       level: AccountInfo.AccountLevel,
       exp: AccountInfo.AccountEXP,
       like: AccountInfo.AccountLikes,
-      region: AccountInfo.AccountRegion, 
+      region: regionFull, 
+      flag: flagEmoji, 
       title: AccountInfo.Title,
       seasonId: AccountInfo.AccountSeasonId,
       releaseVersion: AccountInfo.ReleaseVersion,
