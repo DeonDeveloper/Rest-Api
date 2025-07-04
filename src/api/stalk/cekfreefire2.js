@@ -285,9 +285,10 @@ async function stalkFreeFire(uid) {
 
     const convertEpochToDate = (epoch) => new Date(parseInt(epoch) * 1000).toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' });
 
-   const regionFull = mooCountry(AccountInfo.AccountRegion);
-   const flagEmoji = regionFull.match(/[\u{1F1E6}-\u{1F1FF}]{2}/u)?.[0] || '';
-
+   // Ubah region code ke nama lengkap dan ambil emoji bendera
+    const regionCode = (AccountInfo.AccountRegion || '').toUpperCase();
+    const regionFull = mooCountry(regionCode);
+    const flagEmoji = regionFull.match(/[\u{1F1E6}-\u{1F1FF}]{2}/u)?.[0] || '';
     
     return {
       status: true,
