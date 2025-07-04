@@ -284,12 +284,7 @@ async function stalkFreeFire(uid) {
     } = data;
 
     const convertEpochToDate = (epoch) => new Date(parseInt(epoch) * 1000).toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' });
-
-   // Ubah region code ke nama lengkap dan ambil emoji bendera
-    const regionCode = (AccountInfo.AccountRegion || '').toUpperCase();
-    const regionFull = mooCountry(regionCode);
-    const flagEmoji = regionFull.match(/[\u{1F1E6}-\u{1F1FF}]{2}/u)?.[0] || '';
-    
+   
     return {
       status: true,
       uid,
@@ -297,8 +292,7 @@ async function stalkFreeFire(uid) {
       level: AccountInfo.AccountLevel,
       exp: AccountInfo.AccountEXP,
       like: AccountInfo.AccountLikes,
-      region: regionFull,
-      flag: flagEmoji, 
+      region: AccountInfo.AccountRegion, 
       title: AccountInfo.Title,
       seasonId: AccountInfo.AccountSeasonId,
       releaseVersion: AccountInfo.ReleaseVersion,
@@ -362,10 +356,7 @@ module.exports = function(app) {
         message: 'Parameter id harus diisi.'
       });
     }
-
-    
-
-
+  
     try {
       const result = await stalkFreeFire(id);
 
@@ -374,9 +365,7 @@ module.exports = function(app) {
       status: false,
       message: result.message || 'Data tidak ditemukan.'
     });
-  }
-
-  
+  }  
       
       return res.status(200).json(result);
     } catch (error) {
