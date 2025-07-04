@@ -325,6 +325,12 @@
           "innerDesc": "Buy apikey >> wa.me/6285784856257"
         }, 
         {
+          "name": "Free Fire V2 Stalk",
+          "desc": "Stalk free fire v2 account",
+          "path": "/stalk/ffv2?apikey=&id=", 
+          "innerDesc": "Buy apikey >> wa.me/6285784856257"
+        }, 
+        {
           "name": "Supersus Stalk",
           "desc": "Stalk supersus account",
           "path": "/stalk/supersus?apikey=&id=", 
