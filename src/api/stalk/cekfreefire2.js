@@ -1,5 +1,6 @@
 const fetch = require('node-fetch');
 const axios = require('axios');
+const moment = require('moment');
 
 // Fungsi untuk mengonversi kode negara ke nama lengkap dengan bendera
 const mooCountry = (value) => {
@@ -258,86 +259,76 @@ const mooCountry = (value) => {
   return regionMap[value] || 'Tidak diketahui';
 };
 
+
 async function stalkFreeFire(uid) {
   try {
-    const endpoint = 'https://client-hlgamingofficial.vercel.app/api/ff-hl-gaming-official-api-account-v2-latest/account';
-    const headers = {
-      'Content-Type': 'application/json',
-      'Origin': 'https://www.hlgamingofficial.com',
-      'Referer': 'https://www.hlgamingofficial.com/',
-      'User-Agent': 'Mozilla/5.0'
-    };
+    const url = `https://discordbot.freefirecommunity.com/player_info_api?uid=${uid}&region=id`;
 
-    const body = { uid, region: 'id', key: 'FFwlx' };
-    const { data } = await axios.post(endpoint, body, { headers });
+    const res = await axios.get(url, {
+      headers: {
+        'Origin': 'https://www.freefirecommunity.com',
+        'Referer': 'https://www.freefirecommunity.com/ff-account-info/',
+        'User-Agent': 'Mozilla/5.0 (Linux; Android 10; K)',
+        'Accept': '*/*',
+        'Accept-Encoding': 'gzip, deflate, br'
+      }
+    });
 
-    if (!data?.AccountInfo) throw new Error("Akun tidak ditemukan");
+    const d = res.data.player_info || {};
+    const b = d.basicInfo || {};
+    const c = d.creditScoreInfo || {};
+    const p = d.petInfo || {};
+    const prof = d.profileInfo || {};
+    const s = d.socialInfo || {};
+    const diamond = d.diamondCostRes || {};
 
-    const {
-      AccountInfo,
-      AccountProfileInfo,
-      GuildInfo,
-      captainBasicInfo,
-      creditScoreInfo,
-      petInfo,
-      socialinfo
-    } = data;
+    const safe = (val, fallback = 'N/A') => val !== undefined && val !== null ? val : fallback;
+    const formatTime = (unix) => unix ? moment.unix(unix).format('YYYY-MM-DD HH:mm:ss') : 'N/A';
 
-    const convertEpochToDate = (epoch) => new Date(parseInt(epoch) * 1000).toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' });
-
-   // Ubah region code ke nama lengkap dan ambil emoji bendera
-    const regionCode = (AccountInfo.AccountRegion || '').toUpperCase();
+    const regionCode = (b.region || 'ID').toUpperCase();
     const regionFull = mooCountry(regionCode);
     const flagEmoji = regionFull.match(/[\u{1F1E6}-\u{1F1FF}]{2}/u)?.[0] || '';
-    
+
     return {
       status: true,
-      uid,
-      nickname: AccountInfo.AccountName,
-      level: AccountInfo.AccountLevel,
-      exp: AccountInfo.AccountEXP,
-      like: AccountInfo.AccountLikes,
-      region: regionFull, 
-      flag: flagEmoji, 
-      title: AccountInfo.Title,
-      seasonId: AccountInfo.AccountSeasonId,
-      releaseVersion: AccountInfo.ReleaseVersion,
-      createTime: convertEpochToDate(AccountInfo.AccountCreateTime),
-      lastLogin: convertEpochToDate(AccountInfo.AccountLastLogin),
+      uid: b.accountId,
+      nickname: b.nickname,
+      level: b.level,
+      exp: b.exp,
+      like: b.liked,
+      regionCode,
+      region: regionFull,
+      flag: flagEmoji,
+      title: b.title || '-',
+      seasonId: b.seasonId,
+      releaseVersion: b.releaseVersion,
+      createTime: formatTime(b.createAt),
+      lastLogin: formatTime(b.lastLoginAt),
       rank: {
         battleRoyale: {
-          max: AccountInfo.BrMaxRank,
-          point: AccountInfo.BrRankPoint,
-          show: AccountInfo.ShowBrRank
+          rank: b.rank,
+          max: b.maxRank,
+          point: b.rankingPoints
         },
         clashSquad: {
-          max: AccountInfo.CsMaxRank,
-          point: AccountInfo.CsRankPoint,
-          show: AccountInfo.ShowCsRank
+          rank: b.csRank
         }
       },
-      diamondCost: AccountInfo.DiamondCost,
-      outfitIDs: AccountProfileInfo?.EquippedOutfit || [],
-      skillIDs: AccountProfileInfo?.EquippedSkills || [],
-      weapons: captainBasicInfo?.EquippedWeapon || [],
-      creditScore: creditScoreInfo?.creditScore || 0,
-      signature: socialinfo?.AccountSignature || '-',
-      guild: GuildInfo?.GuildID ? {
-        id: GuildInfo.GuildID,
-        name: GuildInfo.GuildName,
-        owner: GuildInfo.GuildOwner,
-        level: GuildInfo.GuildLevel,
-        members: GuildInfo.GuildMember,
-        capacity: GuildInfo.GuildCapacity
+      diamondCost: diamond.diamondCost || 0,
+      outfitIDs: Array.isArray(prof.clothes) ? prof.clothes : [],
+      skillIDs: Array.isArray(prof.equipedSkills) ? prof.equipedSkills : [],
+      creditScore: c.creditScore || 0,
+      signature: s.signature || '-',
+      pet: p?.id ? {
+        id: p.id,
+        name: p.name,
+        level: p.level,
+        exp: p.exp,
+        selectedSkill: p.selectedSkillId,
+        skin: p.skinId
       } : null,
-      pet: petInfo?.id ? {
-        id: petInfo.id,
-        name: petInfo.name,
-        level: petInfo.level,
-        exp: petInfo.exp,
-        selectedSkill: petInfo.selectedSkillId,
-        skin: petInfo.skinId
-      } : null
+      bannerImage: `https://discordbot.freefirecommunity.com/banner_image_api?uid=${uid}&region=id`,
+      outfitImage: `https://discordbot.freefirecommunity.com/outfit_image_api?uid=${uid}&region=id`
     };
 
   } catch (e) {
@@ -352,27 +343,26 @@ async function stalkFreeFire(uid) {
 module.exports = function(app) {
   app.get('/stalk/ffv2', async (req, res) => {
     const { apikey, id } = req.query;
-    const check = global.apikey
-    if (!global.apikey.includes(apikey)) return res.json("Apikey tidak valid.")
+    const check = global.apikey;
+    if (!global.apikey.includes(apikey)) return res.json("Apikey tidak valid.");
 
-    
     if (!id) {
       return res.status(400).json({
         status: false,
         message: 'Parameter id harus diisi.'
       });
     }
-  
+
     try {
       const result = await stalkFreeFire(id);
 
       if (!result.status) {
-    return res.status(404).json({
-      status: false,
-      message: result.message || 'Data tidak ditemukan.'
-    });
-  }  
-      
+        return res.status(404).json({
+          status: false,
+          message: result.message || 'Data tidak ditemukan.'
+        });
+      }
+
       return res.status(200).json(result);
     } catch (error) {
       return res.status(500).json({
