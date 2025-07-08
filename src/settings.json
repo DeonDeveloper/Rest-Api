@@ -48,7 +48,7 @@
         {
           "name": "Cek Status",
           "desc": "Cek status payment", 
-          "path": "/orderkuota/cekstatus?apikey=&merchant=&keyorkut=", 
+          "path": "/orderkuota/cekstatus?apikey=&merchant=", 
           "innerDesc": "Buy apikey >> wa.me/6285784856257"          
         }
       ]
