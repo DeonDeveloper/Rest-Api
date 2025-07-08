@@ -153,27 +153,46 @@ app.get('/orderkuota/createpayment', async (req, res) => {
 });
     
 app.get('/orderkuota/cekstatus', async (req, res) => {
-    const { merchant, keyorkut, apikey } = req.query;
-    const check = global.apikey
-    if (!global.apikey.includes(apikey)) return res.json("Apikey tidak valid.")
-        try {
-        const apiUrl = `https://gateway.okeconnect.com/api/mutasi/qris/${merchant}/${keyorkut}`;
-        const response = await axios.get(apiUrl);
-        const result = await response.data;
-                // Check if data exists and get the latest transaction
-        const latestTransaction = result.data && result.data.length > 0 ? result.data[0] : null;
-                if (latestTransaction) {
-         res.status(200).json({
-            status: true, 
-            result: latestTransaction
-        })
-        } else {
-            res.json({ message: "No transactions found." });
-        }
-    } catch (error) {
-        res.status(500).json({ error: error.message });
+    const { merchant, apikey } = req.query;
+    const check = global.apikey;
+
+    if (!check.includes(apikey)) {
+        return res.status(401).json({ status: false, message: "Apikey tidak valid." });
     }
-})
+
+    try {
+        const apiUrl = `https://api.hamsoffc.me/orkut/mutasi?apikey=HAMS-c2b941909b5e&merchant=${merchant}`;
+        const response = await axios.get(apiUrl);
+        const data = response.data;
+
+        // Validasi data dari API Hams Offc
+        const result = data?.result?.result;
+        if (result) {
+            return res.status(200).json({
+                status: true,
+                result: {
+                    date: result.date,
+                    amount: result.amount,
+                    type: result.type,
+                    qris: result.qris,
+                    brand_name: result.brand_name,
+                    issuer_reff: result.issuer_reff,
+                    buyer_reff: result.buyer_reff,
+                    balance: result.balance
+                }
+            });
+        } else {
+            return res.status(404).json({ status: false, message: "Transaksi tidak ditemukan." });
+        }
+
+    } catch (error) {
+        return res.status(500).json({
+            status: false,
+            message: "Terjadi kesalahan saat mengambil data.",
+            error: error.message
+        });
+    }
+});
 
 app.get('/orderkuota/ceksaldo', async (req, res) => {
     const { merchant, keyorkut, apikey } = req.query;
