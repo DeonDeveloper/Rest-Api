@@ -167,8 +167,8 @@ module.exports = function (app) {
   const { data, error } = await supabase
     .from('apikeys')
     .select('apikey')
-    .eq('apikey', apikey)
-    .single(); // ← GUNAKAN INI
+    .eq('apikey', apikey);
+    
 
   if (error || !data || data.apikey !== apikey) {
     return res.status(401).json({ status: false, message: 'Apikey tidak ditemukan di database.' });
