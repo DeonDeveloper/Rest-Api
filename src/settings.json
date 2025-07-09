@@ -54,7 +54,7 @@
       ]
     }, 
     {
-      "name": "Orderkuota V3 Gateway",
+      "name": "Orderkuota V2 Gateway",
       "items": [
         {
           "name": "Login Payment",
