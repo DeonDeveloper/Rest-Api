@@ -1,9 +1,12 @@
-// orderkuota.js
 const axios = require('axios');
 const crypto = require('crypto');
 const qs = require('qs');
 
-const tokenCache = {}; // Simpan token sementara
+const tokenCache = {}; // Cache token sementara
+
+const APP_REG_ID = 'di309HvATsaiCppl5eDpoc:APA91bFUcTOH8h2XHdPRz2qQ5Bezn-3_TaycFcJ5pNLGWpmaxheQP9Ri0E56wLHz0_b1vcss55jbRQXZgc9loSfBdNa5nZJZVMlk7GS1JDMGyFUVvpcwXbMDg8tjKGZAurCGR4kDMDRJ';
+const APP_VERSION_CODE = '250314';
+const APP_VERSION_NAME = '25.03.14';
 
 function generateTransactionId() {
   return crypto.randomBytes(5).toString('hex').toUpperCase();
@@ -15,14 +18,14 @@ function generateExpirationTime() {
   return expirationTime;
 }
 
-// Fungsi login ke OrderKuota (digunakan juga untuk OTP)
+// Fungsi login (bisa pakai password atau OTP)
 async function loginOrderkuota(username, password) {
   const payload = qs.stringify({
     username,
     password,
-    app_reg_id: 'di309HvATsaiCppl5eDpoc:APA91bFUcTOH8h2XHdPRz2qQ5Bezn-3_TaycFcJ5pNLGWpmaxheQP9Ri0E56wLHz0_b1vcss55jbRQXZgc9loSfBdNa5nZJZVMlk7GS1JDMGyFUVvpcwXbMDg8tjKGZAurCGR4kDMDRJ',
-    app_version_code: '250314',
-    app_version_name: '25.03.14'
+    app_reg_id: APP_REG_ID,
+    app_version_code: APP_VERSION_CODE,
+    app_version_name: APP_VERSION_NAME
   });
 
   const res = await axios.post('https://app.orderkuota.com/api/v2/login', payload, {
@@ -33,10 +36,28 @@ async function loginOrderkuota(username, password) {
     }
   });
 
-  return res.data;
+  const data = res.data;
+
+  if (data.success && data.results?.otp === 'email') {
+    return {
+      status: 'otp_sent',
+      message: `OTP dikirim ke ${data.results.otp_value}`,
+      raw: data
+    };
+  }
+
+  if (data.success && data.results?.token) {
+    return {
+      status: 'token_ok',
+      token: data.results.token,
+      raw: data
+    };
+  }
+
+  throw new Error(data?.message || 'Login gagal');
 }
 
-// Fungsi ambil mutasi QRIS
+// Ambil mutasi QRIS
 async function getMutasi(username, token) {
   const payload = qs.stringify({
     auth_token: token,
@@ -48,9 +69,9 @@ async function getMutasi(username, token) {
     'requests[qris_history][ke_tanggal]': '',
     'requests[qris_history][keterangan]': '',
     'requests[0]': 'account',
-    app_version_name: '25.03.14',
-    app_version_code: '250314',
-    app_reg_id: 'di309HvATsaiCppl5eDpoc:APA91bFUcTOH8h2XHdPRz2qQ5Bezn-3_TaycFcJ5pNLGWpmaxheQP9Ri0E56wLHz0_b1vcss55jbRQXZgc9loSfBdNa5nZJZVMlk7GS1JDMGyFUVvpcwXbMDg8tjKGZAurCGR4kDMDRJ'
+    app_version_name: APP_VERSION_NAME,
+    app_version_code: APP_VERSION_CODE,
+    app_reg_id: APP_REG_ID
   });
 
   const res = await axios.post('https://app.orderkuota.com/api/v2/get', payload, {
@@ -64,55 +85,62 @@ async function getMutasi(username, token) {
   return res.data;
 }
 
-// Modul export Express routes
+// Route Express
 module.exports = function (app) {
-   app.get('/orderkuotav3/login', async (req, res) => {
+  // ✅ Login (untuk trigger OTP atau langsung login)
+  app.get('/orderkuotav3/login', async (req, res) => {
     const { username, password, apikey } = req.query;
     if (!global.apikey.includes(apikey)) return res.status(401).json({ status: false, message: "Apikey tidak valid." });
 
-
-    if (!username || !password) {
+    if (!username || !password)
       return res.status(400).json({ status: false, message: "Username atau password kosong." });
-    }
 
     try {
       const result = await loginOrderkuota(username, password);
-      return res.json({ status: true, result });
+      if (result.status === 'otp_sent') {
+        return res.json({ status: true, otp_sent: true, message: result.message });
+      } else if (result.status === 'token_ok') {
+        tokenCache[username] = result.token;
+        return res.json({ status: true, token: result.token });
+      } else {
+        return res.status(400).json({ status: false, message: "Login gagal." });
+      }
     } catch (error) {
       return res.status(500).json({ status: false, message: error.message });
     }
   });
 
+  // ✅ Verifikasi OTP
   app.get('/orderkuotav3/otp', async (req, res) => {
     const { username, otp, apikey } = req.query;
     if (!global.apikey.includes(apikey)) return res.status(401).json({ status: false, message: "Apikey tidak valid." });
 
-    if (!username || !otp) {
+    if (!username || !otp)
       return res.status(400).json({ status: false, message: "Username atau OTP kosong." });
-    }
 
     try {
       const result = await loginOrderkuota(username, otp);
-      if (result?.results?.token) {
-        tokenCache[username] = result.results.token;
+      if (result.status === 'token_ok') {
+        tokenCache[username] = result.token;
+        return res.json({ status: true, token: result.token });
+      } else {
+        return res.status(400).json({ status: false, message: "OTP salah atau tidak valid." });
       }
-      return res.json({ status: true, result });
     } catch (error) {
       return res.status(500).json({ status: false, message: error.message });
     }
   });
 
+  // ✅ Ambil Mutasi
   app.get('/orderkuotav3/mutasi', async (req, res) => {
-    const { username, apikey, token} = req.query;
+    const { username, apikey } = req.query;
     if (!global.apikey.includes(apikey)) return res.status(401).json({ status: false, message: "Apikey tidak valid." });
 
-
-    if (!tokenCache[username]) {
-      return res.status(401).json({ status: false, message: "Token tidak ditemukan. Silakan login dan verifikasi OTP dulu." });
-    }
+    const token = tokenCache[username];
+    if (!token) return res.status(401).json({ status: false, message: "Token tidak ditemukan. Silakan login dan OTP dulu." });
 
     try {
-      const result = await getMutasi(username, tokenCache[username]);
+      const result = await getMutasi(username, token);
       return res.json({ status: true, result });
     } catch (error) {
       return res.status(500).json({ status: false, message: error.message });
