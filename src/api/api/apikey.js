@@ -8,6 +8,7 @@ const supabase = createClient(
 );
 
 // 🔐 Tambah Apikey (valid 30 hari)
+module.exports = function (app) {
 app.get('/apikey/add', async (req, res) => {
   const { nomor_wa, apikey } = req.query;
 
@@ -80,3 +81,4 @@ app.get('/apikey/cek', async (req, res) => {
 
   return res.json({ status: true, message: 'Apikey masih aktif', expired_at: data.expired_at });
 });
+};
