@@ -42,7 +42,7 @@ async function loginOrderkuota(username, password) {
 
   if (data.success && data.results?.token) {
     await supabase
-      .from('tokens')
+      .from('data')
       .upsert({ username, token: data.results.token, updated_at: new Date().toISOString() });
 
     return {
@@ -57,7 +57,7 @@ async function loginOrderkuota(username, password) {
 // ✅ Fungsi ambil mutasi QRIS
 async function getMutasi(username) {
   const { data, error } = await supabase
-    .from('tokens')
+    .from('data')
     .select('token')
     .eq('username', username)
     .single();
