@@ -39,7 +39,7 @@ app.get('/apikey/perpanjang', async (req, res) => {
   const { data, error } = await supabase
     .from('apikeys')
     .select('expired_at')
-    .eq('apikey', apikey)
+    .eq('token', apikey)
     .single();
 
   if (error || !data)
