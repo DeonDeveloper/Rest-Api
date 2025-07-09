@@ -19,7 +19,7 @@ app.get('/apikey/add', async (req, res) => {
 
   const { error } = await supabase
     .from('apikeys')
-    .upsert({ nomor_wa, apikey, expired_at });
+    .upsert({ nomor_wa, apikey, token: apikey, expired_at });
 
   if (error) {
     return res.status(500).json({ status: false, message: 'Gagal menyimpan apikey' });
