@@ -71,7 +71,7 @@
         {
           "name": "Cek Mutasi",
           "desc": "Cek Mutasi", 
-          "path": "/orderkuotav2/mutasi?apikey=&username=&token=", 
+          "path": "/orderkuotav2/mutasi?apikey=&username=", 
           "innerDesc": "Buy apikey >> wa.me/6285784856257"          
         }
       ]
