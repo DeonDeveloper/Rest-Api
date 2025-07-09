@@ -1,12 +1,38 @@
 const axios = require('axios');
 const crypto = require('crypto');
 const qs = require('qs');
+const fs = require('fs');
+const path = require('path');
 
-const tokenCache = {}; // Cache token sementara
-
+const TOKEN_FILE = path.join(__dirname, './cache/token-ok.json');
 const APP_REG_ID = 'di309HvATsaiCppl5eDpoc:APA91bFUcTOH8h2XHdPRz2qQ5Bezn-3_TaycFcJ5pNLGWpmaxheQP9Ri0E56wLHz0_b1vcss55jbRQXZgc9loSfBdNa5nZJZVMlk7GS1JDMGyFUVvpcwXbMDg8tjKGZAurCGR4kDMDRJ';
 const APP_VERSION_CODE = '250314';
 const APP_VERSION_NAME = '25.03.14';
+
+// Buat folder cache jika belum ada
+if (!fs.existsSync('./cache')) fs.mkdirSync('./cache');
+
+// Load/simpan token dari/ke file
+function loadTokenCache() {
+  try {
+    if (fs.existsSync(TOKEN_FILE)) {
+      return JSON.parse(fs.readFileSync(TOKEN_FILE, 'utf8'));
+    }
+  } catch (e) {
+    console.error('[LOAD TOKEN ERROR]', e.message);
+  }
+  return {};
+}
+
+function saveTokenCache(data) {
+  try {
+    fs.writeFileSync(TOKEN_FILE, JSON.stringify(data, null, 2));
+  } catch (e) {
+    console.error('[SAVE TOKEN ERROR]', e.message);
+  }
+}
+
+let tokenCache = loadTokenCache();
 
 function generateTransactionId() {
   return crypto.randomBytes(5).toString('hex').toUpperCase();
@@ -18,11 +44,11 @@ function generateExpirationTime() {
   return expirationTime;
 }
 
-// Fungsi login (bisa pakai password atau OTP)
-async function loginOrderkuota(username, password) {
+// Fungsi login (pakai password atau OTP)
+async function loginOrderkuota(username, passwordOrOtp) {
   const payload = qs.stringify({
     username,
-    password,
+    password: passwordOrOtp,
     app_reg_id: APP_REG_ID,
     app_version_code: APP_VERSION_CODE,
     app_version_name: APP_VERSION_NAME
@@ -57,7 +83,7 @@ async function loginOrderkuota(username, password) {
   throw new Error(data?.message || 'Login gagal');
 }
 
-// Ambil mutasi QRIS
+// Fungsi ambil mutasi QRIS
 async function getMutasi(username, token) {
   const payload = qs.stringify({
     auth_token: token,
@@ -85,15 +111,17 @@ async function getMutasi(username, token) {
   return res.data;
 }
 
-// Route Express
+// ROUTES
 module.exports = function (app) {
-  // ✅ Login (untuk trigger OTP atau langsung login)
   app.get('/orderkuotav2/login', async (req, res) => {
     const { username, password, apikey } = req.query;
-    if (!global.apikey.includes(apikey)) return res.status(401).json({ status: false, message: "Apikey tidak valid." });
+    if (!global.apikey || !global.apikey.includes(apikey)) {
+      return res.status(401).json({ status: false, message: "Apikey tidak valid." });
+    }
 
-    if (!username || !password)
+    if (!username || !password) {
       return res.status(400).json({ status: false, message: "Username atau password kosong." });
+    }
 
     try {
       const result = await loginOrderkuota(username, password);
@@ -101,6 +129,7 @@ module.exports = function (app) {
         return res.json({ status: true, otp_sent: true, message: result.message });
       } else if (result.status === 'token_ok') {
         tokenCache[username] = result.token;
+        saveTokenCache(tokenCache);
         return res.json({ status: true, token: result.token });
       } else {
         return res.status(400).json({ status: false, message: "Login gagal." });
@@ -110,18 +139,21 @@ module.exports = function (app) {
     }
   });
 
-  // ✅ Verifikasi OTP
   app.get('/orderkuotav2/otp', async (req, res) => {
     const { username, otp, apikey } = req.query;
-    if (!global.apikey.includes(apikey)) return res.status(401).json({ status: false, message: "Apikey tidak valid." });
+    if (!global.apikey || !global.apikey.includes(apikey)) {
+      return res.status(401).json({ status: false, message: "Apikey tidak valid." });
+    }
 
-    if (!username || !otp)
+    if (!username || !otp) {
       return res.status(400).json({ status: false, message: "Username atau OTP kosong." });
+    }
 
     try {
       const result = await loginOrderkuota(username, otp);
       if (result.status === 'token_ok') {
         tokenCache[username] = result.token;
+        saveTokenCache(tokenCache);
         return res.json({ status: true, token: result.token });
       } else {
         return res.status(400).json({ status: false, message: "OTP salah atau tidak valid." });
@@ -131,13 +163,16 @@ module.exports = function (app) {
     }
   });
 
-  // ✅ Ambil Mutasi
   app.get('/orderkuotav2/mutasi', async (req, res) => {
-    const { username, apikey } = req.query;
-    if (!global.apikey.includes(apikey)) return res.status(401).json({ status: false, message: "Apikey tidak valid." });
+    const { username, apikey, token} = req.query;
+    if (!global.apikey || !global.apikey.includes(apikey)) {
+      return res.status(401).json({ status: false, message: "Apikey tidak valid." });
+    }
 
     const token = tokenCache[username];
-    if (!token) return res.status(401).json({ status: false, message: "Token tidak ditemukan. Silakan login dan OTP dulu." });
+    if (!token) {
+      return res.status(401).json({ status: false, message: "Token tidak ditemukan. Silakan login dan OTP dulu." });
+    }
 
     try {
       const result = await getMutasi(username, token);
