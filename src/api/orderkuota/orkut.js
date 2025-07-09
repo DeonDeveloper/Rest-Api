@@ -164,14 +164,15 @@ module.exports = function (app) {
     return res.status(400).json({ status: false, message: 'apikey wajib diisi' });
   }
 
-// Query ke Supabase untuk memverifikasi apikey
+  console.log("APIKEY DITERIMA:", apikey);
+
   const { data, error } = await supabase
     .from('apikeys')
     .select('apikey')
-    .eq('apikey', apikey)
-    .single(); // ← GUNAKAN INI
+    .ilike('apikey', apikey) // pakai ilike agar tidak case-sensitive
+    .maybeSingle();
 
-  if (error || !data || data.apikey !== apikey) {
+  if (error || !data) {
     return res.status(401).json({ status: false, message: 'Apikey tidak ditemukan di database.' });
   }
 
