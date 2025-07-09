@@ -97,19 +97,7 @@ module.exports = function (app) {
   // 🔐 Login / trigger OTP
   app.get('/orderkuotav2/login', async (req, res) => {
     const { username, password, apikey } = req.query;
-    if (!apikey) {
-    return res.status(400).json({ status: false, message: 'apikey wajib diisi' });
-  }
-
-  const { data, error } = await supabase
-    .from('apikeys')
-    .select('apikey')
-    .eq('apikey', apikey)
-    .single(); // ← GUNAKAN INI
-
-  if (error || !data || data.apikey !== apikey) {
-    return res.status(401).json({ status: false, message: 'Apikey tidak ditemukan di database.' });
-  }
+    if (!global.apikey.includes(apikey)) return res.status(401).json({ status: false, message: 'Apikey tidak valid.' });
     if (!username || !password) return res.status(400).json({ status: false, message: 'Username atau password kosong.' });
 
     try {
@@ -129,19 +117,7 @@ module.exports = function (app) {
   // 🔐 Verifikasi OTP
   app.get('/orderkuotav2/otp', async (req, res) => {
     const { username, otp, apikey } = req.query;
- if (!apikey) {
-    return res.status(400).json({ status: false, message: 'apikey wajib diisi' });
-  }
-
-  const { data, error } = await supabase
-    .from('apikeys')
-    .select('apikey')
-    .eq('apikey', apikey)
-    .single(); // ← GUNAKAN INI
-
-  if (error || !data || data.apikey !== apikey) {
-    return res.status(401).json({ status: false, message: 'Apikey tidak ditemukan di database.' });
-  }
+ if (!global.apikey.includes(apikey)) return res.status(401).json({ status: false, message: 'Apikey tidak valid.' });
   if (!username || !otp) return res.status(400).json({ status: false, message: 'Username atau OTP kosong.' });
 
     try {
@@ -160,22 +136,7 @@ module.exports = function (app) {
   app.get('/orderkuotav2/mutasi', async (req, res) => {
   const { username, apikey } = req.query;
 
-  if (!apikey) {
-    return res.status(400).json({ status: false, message: 'apikey wajib diisi' });
-  }
-
-  console.log("APIKEY DITERIMA:", apikey);
-
-  const { data, error } = await supabase
-    .from('apikeys')
-    .select('apikey')
-    .ilike('apikey', apikey) // pakai ilike agar tidak case-sensitive
-    .maybeSingle();
-
-  if (error || !data) {
-    return res.status(401).json({ status: false, message: 'Apikey tidak ditemukan di database.' });
-  }
-
+  if (!global.apikey.includes(apikey)) return res.status(401).json({ status: false, message: 'Apikey tidak valid.' });
   try {
     const result = await getMutasi(username);
     return res.json({ status: true, result });
