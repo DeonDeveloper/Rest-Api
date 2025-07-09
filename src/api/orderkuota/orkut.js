@@ -3,9 +3,13 @@ const qs = require('qs');
 const admin = require('firebase-admin');
 
 // 🔐 Inisialisasi Firebase Admin SDK jika belum
+require('dotenv').config();
+
 if (!admin.apps.length) {
+  const serviceAccount = JSON.parse(Buffer.from(process.env.FIREBASE_CREDENTIAL_BASE64, 'base64').toString('utf8'));
+  
   admin.initializeApp({
-    credential: admin.credential.cert(require('./firebase-adminsdk.json')),
+    credential: admin.credential.cert(serviceAccount),
     databaseURL: 'https://fir-69867-default-rtdb.asia-southeast1.firebasedatabase.app'
   });
 }
