@@ -17,10 +17,10 @@ const APP_VERSION_CODE = '250314';
 const APP_VERSION_NAME = '25.03.14';
 
 // Fungsi login / OTP
-async function loginOrderkuota(username, passwordOrOtp) {
+async function loginOrderkuota(username, password) {
   const payload = qs.stringify({
     username,
-    password: passwordOrOtp,
+    password: password,
     app_reg_id: APP_REG_ID,
     app_version_code: APP_VERSION_CODE,
     app_version_name: APP_VERSION_NAME
