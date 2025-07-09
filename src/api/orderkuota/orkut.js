@@ -139,7 +139,7 @@ module.exports = function (app) {
   
   const { data, error } = await supabase
     .from('apikeys')
-    .select('apikey')
+    .select('token')
     .eq('apikey', apikey)
     .single();
 
