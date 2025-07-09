@@ -144,7 +144,7 @@ module.exports = function (app) {
     .from('apikeys')
     .select('apikey')
     .eq('apikey', apikey)
-    .maybeSingle();
+    .single();
 
   console.log('DATA:', data);
   console.log('ERROR:', error);
