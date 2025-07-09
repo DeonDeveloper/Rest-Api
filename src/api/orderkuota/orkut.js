@@ -88,7 +88,7 @@ async function getMutasi(username, token) {
 // Route Express
 module.exports = function (app) {
   // ✅ Login (untuk trigger OTP atau langsung login)
-  app.get('/orderkuotav3/login', async (req, res) => {
+  app.get('/orderkuotav2/login', async (req, res) => {
     const { username, password, apikey } = req.query;
     if (!global.apikey.includes(apikey)) return res.status(401).json({ status: false, message: "Apikey tidak valid." });
 
@@ -111,7 +111,7 @@ module.exports = function (app) {
   });
 
   // ✅ Verifikasi OTP
-  app.get('/orderkuotav3/otp', async (req, res) => {
+  app.get('/orderkuotav2/otp', async (req, res) => {
     const { username, otp, apikey } = req.query;
     if (!global.apikey.includes(apikey)) return res.status(401).json({ status: false, message: "Apikey tidak valid." });
 
@@ -132,7 +132,7 @@ module.exports = function (app) {
   });
 
   // ✅ Ambil Mutasi
-  app.get('/orderkuotav3/mutasi', async (req, res) => {
+  app.get('/orderkuotav2/mutasi', async (req, res) => {
     const { username, apikey } = req.query;
     if (!global.apikey.includes(apikey)) return res.status(401).json({ status: false, message: "Apikey tidak valid." });
 
