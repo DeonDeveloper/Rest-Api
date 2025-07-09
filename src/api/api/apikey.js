@@ -53,7 +53,7 @@ app.get('/apikey/perpanjang', async (req, res) => {
   const { error: updateError } = await supabase
     .from('apikeys')
     .update({ expired_at: newExpired })
-    .eq('apikey', apikey);
+    .eq('token', apikey);
 
   if (updateError)
     return res.status(500).json({ status: false, message: 'Gagal memperpanjang apikey' });
@@ -73,7 +73,7 @@ app.get('/apikey/cek', async (req, res) => {
   const { data, error } = await supabase
     .from('apikeys')
     .select('*')
-    .eq('apikey', apikey)
+    .eq('token', apikey)
     .gt('expired_at', now)
     .maybeSingle();
 
