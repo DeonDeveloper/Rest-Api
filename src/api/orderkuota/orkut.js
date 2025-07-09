@@ -144,12 +144,9 @@ module.exports = function (app) {
     .from('apikeys')
     .select('apikey')
     .eq('apikey', apikey)
-    .single();
+    .single(); // ← GUNAKAN INI
 
-  console.log('DATA:', data);
-  console.log('ERROR:', error);
-
-  if (error || !data || !data.apikey) {
+  if (error || !data || data.apikey !== apikey) {
     return res.status(401).json({ status: false, message: 'Apikey tidak ditemukan di database.' });
   }
 
@@ -160,5 +157,6 @@ module.exports = function (app) {
     return res.status(500).json({ status: false, message: error.message });
   }
 });
+
 
 };
