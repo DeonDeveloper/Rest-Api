@@ -1,9 +1,9 @@
 const axios = require('axios');
 const qs = require('qs');
-const crypto = require('crypto');
 const admin = require('firebase-admin');
+const crypto = require('crypto');
 
-// 🔐 Inisialisasi Firebase Admin SDK
+// Inisialisasi Firebase
 admin.initializeApp({
   credential: admin.credential.cert(require('./firebase-adminsdk.json')),
   databaseURL: 'https://fir-69867-default-rtdb.asia-southeast1.firebasedatabase.app'
@@ -11,8 +11,7 @@ admin.initializeApp({
 
 const db = admin.firestore();
 const tokenRef = db.collection('orderkuota_tokens');
-
-const tokenCache = {};
+const otpRef = db.collection('orderkuota_otpflags');
 
 const APP_REG_ID = 'di309HvATsaiCppl5eDpoc:APA91bFUcTOH8h2XHdPRz2qQ5Bezn-3_TaycFcJ5pNLGWpmaxheQP9Ri0E56wLHz0_b1vcss55jbRQXZgc9loSfBdNa5nZJZVMlk7GS1JDMGyFUVvpcwXbMDg8tjKGZAurCGR4kDMDRJ';
 const APP_VERSION_CODE = '250314';
@@ -22,13 +21,6 @@ function generateTransactionId() {
   return crypto.randomBytes(5).toString('hex').toUpperCase();
 }
 
-function generateExpirationTime() {
-  const expirationTime = new Date();
-  expirationTime.setMinutes(expirationTime.getMinutes() + 30);
-  return expirationTime;
-}
-
-// Fungsi login atau OTP
 async function loginOrderkuota(username, password) {
   const payload = qs.stringify({
     username,
@@ -49,6 +41,7 @@ async function loginOrderkuota(username, password) {
   const data = res.data;
 
   if (data.success && data.results?.otp === 'email') {
+    await otpRef.doc(username).set({ otp_required: true, time: Date.now() });
     return {
       status: 'otp_sent',
       message: `OTP dikirim ke ${data.results.otp_value}`,
@@ -57,13 +50,10 @@ async function loginOrderkuota(username, password) {
   }
 
   if (data.success && data.results?.token) {
-    // Simpan di Firestore dan Cache lokal
     await tokenRef.doc(username).set({
       token: data.results.token,
       updatedAt: Date.now()
     });
-    tokenCache[username] = data.results.token;
-
     return {
       status: 'token_ok',
       token: data.results.token,
@@ -74,8 +64,12 @@ async function loginOrderkuota(username, password) {
   throw new Error(data?.message || 'Login gagal');
 }
 
-// Ambil mutasi QRIS
-async function getMutasi(username, token) {
+async function getMutasi(username) {
+  const doc = await tokenRef.doc(username).get();
+  if (!doc.exists) throw new Error('Token tidak ditemukan. Login dan OTP dulu.');
+
+  const token = doc.data().token;
+
   const payload = qs.stringify({
     auth_token: token,
     auth_username: username,
@@ -102,15 +96,13 @@ async function getMutasi(username, token) {
   return res.data;
 }
 
-// Route Express
+// Express Routes
 module.exports = function (app) {
-  // ✅ Login (Password biasa atau kirim OTP)
   app.get('/orderkuotav2/login', async (req, res) => {
     const { username, password, apikey } = req.query;
-    if (!global.apikey.includes(apikey)) return res.status(401).json({ status: false, message: "Apikey tidak valid." });
+    if (!global.apikey.includes(apikey)) return res.status(401).json({ status: false, message: 'Apikey tidak valid.' });
 
-    if (!username || !password)
-      return res.status(400).json({ status: false, message: "Username atau password kosong." });
+    if (!username || !password) return res.status(400).json({ status: false, message: 'Username atau password kosong.' });
 
     try {
       const result = await loginOrderkuota(username, password);
@@ -119,49 +111,43 @@ module.exports = function (app) {
       } else if (result.status === 'token_ok') {
         return res.json({ status: true, token: result.token });
       } else {
-        return res.status(400).json({ status: false, message: "Login gagal." });
+        return res.status(400).json({ status: false, message: 'Login gagal.' });
       }
     } catch (error) {
       return res.status(500).json({ status: false, message: error.message });
     }
   });
 
-  // ✅ Verifikasi OTP (dikirim via email, password diganti OTP)
   app.get('/orderkuotav2/otp', async (req, res) => {
     const { username, otp, apikey } = req.query;
-    if (!global.apikey.includes(apikey)) return res.status(401).json({ status: false, message: "Apikey tidak valid." });
+    if (!global.apikey.includes(apikey)) return res.status(401).json({ status: false, message: 'Apikey tidak valid.' });
 
-    if (!username || !otp)
-      return res.status(400).json({ status: false, message: "Username atau OTP kosong." });
+    if (!username || !otp) return res.status(400).json({ status: false, message: 'Username atau OTP kosong.' });
 
     try {
-      const result = await loginOrderkuota(username, otp); // OTP dianggap sebagai password
+      const flagDoc = await otpRef.doc(username).get();
+      if (!flagDoc.exists || !flagDoc.data().otp_required) {
+        return res.status(403).json({ status: false, message: 'OTP tidak sedang diminta. Silakan login dahulu.' });
+      }
+
+      const result = await loginOrderkuota(username, otp);
       if (result.status === 'token_ok') {
+        await otpRef.doc(username).delete(); // bersihkan flag OTP
         return res.json({ status: true, token: result.token });
       } else {
-        return res.status(400).json({ status: false, message: "OTP salah atau tidak valid." });
+        return res.status(400).json({ status: false, message: 'OTP salah atau tidak valid.' });
       }
     } catch (error) {
       return res.status(500).json({ status: false, message: error.message });
     }
   });
 
-  // ✅ Ambil Mutasi
   app.get('/orderkuotav2/mutasi', async (req, res) => {
     const { username, apikey } = req.query;
-    if (!global.apikey.includes(apikey)) return res.status(401).json({ status: false, message: "Apikey tidak valid." });
-
-    let token = tokenCache[username];
-
-    // fallback ke Firestore
-    if (!token) {
-      const doc = await tokenRef.doc(username).get();
-      if (!doc.exists) return res.status(401).json({ status: false, message: "Token tidak ditemukan. Silakan login & OTP." });
-      token = doc.data().token;
-    }
+    if (!global.apikey.includes(apikey)) return res.status(401).json({ status: false, message: 'Apikey tidak valid.' });
 
     try {
-      const result = await getMutasi(username, token);
+      const result = await getMutasi(username);
       return res.json({ status: true, result });
     } catch (error) {
       return res.status(500).json({ status: false, message: error.message });
