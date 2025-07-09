@@ -69,18 +69,20 @@ export default async function handler(req, res) {
   const { method, query, url } = req;
   const { username, password, otp, apikey } = query;
 
-  const validApikeys = ['apikey1', 'apikey2']; // ubah sesuai kebutuhan
-
-  if (method !== 'GET') return res.status(405).json({ status: false, message: 'Metode tidak diizinkan.' });
+    if (method !== 'GET') return res.status(405).json({ status: false, message: 'Metode tidak diizinkan.' });
 
   try {
     if (url.includes('/login')) {
+      if (!global.apikey.includes(apikey)) return res.status(401).json({ status: false, message: "Apikey tidak valid." });
+
       if (!username || !password) return res.status(400).json({ status: false, message: 'Username/password kosong' });
       const result = await loginOrderkuota(username, password);
       return res.json({ status: true, result });
     }
 
     if (url.includes('/otp')) {
+      if (!global.apikey.includes(apikey)) return res.status(401).json({ status: false, message: "Apikey tidak valid." });
+
       if (!username || !otp) return res.status(400).json({ status: false, message: 'Username/OTP kosong' });
       const result = await loginOrderkuota(username, otp); // OTP via login juga
       if (result?.results?.token) tokenCache[username] = result.results.token;
@@ -88,7 +90,8 @@ export default async function handler(req, res) {
     }
 
     if (url.includes('/mutasi')) {
-      if (!validApikeys.includes(apikey)) return res.status(401).json({ status: false, message: 'Apikey tidak valid.' });
+      if (!global.apikey.includes(apikey)) return res.status(401).json({ status: false, message: "Apikey tidak valid." });
+
       const token = tokenCache[username];
       if (!token) return res.status(401).json({ status: false, message: 'Token tidak ditemukan. Silakan login dan OTP dulu.' });
       const result = await getMutasi(username, token);
