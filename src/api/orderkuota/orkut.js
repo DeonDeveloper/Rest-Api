@@ -1,22 +1,12 @@
 const axios = require('axios');
 const qs = require('qs');
-const admin = require('firebase-admin');
+const { createClient } = require('@supabase/supabase-js');
 
-// ✅ Inisialisasi Firebase Admin SDK
-if (!admin.apps.length) {
-  try {
-    admin.initializeApp({
-      credential: admin.credential.cert(require('./firebase-adminsdk.json')),
-      databaseURL: 'https://fir-69867-default-rtdb.asia-southeast1.firebasedatabase.app'
-    });
-  } catch (e) {
-    console.error('❌ Gagal inisialisasi Firebase Admin:', e.message);
-    process.exit(1); // stop program
-  }
-}
-
-const db = admin.firestore();
-const tokenRef = db.collection('orderkuota_tokens');
+// ✅ Inisialisasi Supabase
+const supabase = createClient(
+  'https://yohjdlqqeoxvsmhadoqn.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlvaGpkbHFxZW94dnNtaGFkb3FuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTIwMzU3NDAsImV4cCI6MjA2NzYxMTc0MH0.eH4cOXY1w58xPrcq8IP4AyU5P3RArAZ_SXd023DsIog'
+);
 
 const APP_REG_ID = 'di309HvATsaiCppl5eDpoc:APA91bFUcTOH8h2XHdPRz2qQ5Bezn-3_TaycFcJ5pNLGWpmaxheQP9Ri0E56wLHz0_b1vcss55jbRQXZgc9loSfBdNa5nZJZVMlk7GS1JDMGyFUVvpcwXbMDg8tjKGZAurCGR4kDMDRJ';
 const APP_VERSION_CODE = '250314';
@@ -51,10 +41,10 @@ async function loginOrderkuota(username, password) {
   }
 
   if (data.success && data.results?.token) {
-    await tokenRef.doc(username).set({
-      token: data.results.token,
-      updatedAt: Date.now()
-    });
+    await supabase
+      .from('tokens')
+      .upsert({ username, token: data.results.token, updated_at: new Date().toISOString() });
+
     return {
       status: 'token_ok',
       token: data.results.token
@@ -66,10 +56,15 @@ async function loginOrderkuota(username, password) {
 
 // ✅ Fungsi ambil mutasi QRIS
 async function getMutasi(username) {
-  const doc = await tokenRef.doc(username).get();
-  if (!doc.exists) throw new Error('Token tidak ditemukan. Silakan login dulu.');
+  const { data, error } = await supabase
+    .from('tokens')
+    .select('token')
+    .eq('username', username)
+    .single();
 
-  const token = doc.data().token;
+  if (error || !data) throw new Error('Token tidak ditemukan. Silakan login dulu.');
+
+  const token = data.token;
 
   const payload = qs.stringify({
     auth_token: token,
