@@ -166,20 +166,14 @@ module.exports = function (app) {
 
   apikey = apikey.trim().toLowerCase();
 
-  // Query ke Supabase untuk mencari apakah apikey ada
-  const { data } = await supabase
+ // Query ke Supabase untuk memverifikasi apikey
+  const { data, error } = await supabase
     .from('apikeys')
     .select('apikey')
-    .eq('apikey', apikey); // PASTIKAN kolom di DB memang bernama 'apikey'
+    .eq('apikey', apikey)
+    .single(); // hanya ambil satu baris
 
-  // Log untuk debug (bisa dihapus nanti)
-  console.log('[DEBUG] Hasil cek apikey:', data);
-
-  if (error) {
-    return res.status(500).json({ status: false, message: 'Gagal mengecek apikey.' });
-  }
-
-  if (!Array.isArray(data) || data.length === 0) {
+  if (error || !data) {
     return res.status(401).json({ status: false, message: 'Apikey tidak ditemukan atau tidak valid.' });
   }
 
