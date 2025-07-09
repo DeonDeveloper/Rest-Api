@@ -97,7 +97,19 @@ module.exports = function (app) {
   // 🔐 Login / trigger OTP
   app.get('/orderkuotav2/login', async (req, res) => {
     const { username, password, apikey } = req.query;
-    if (!global.apikey.includes(apikey)) return res.status(401).json({ status: false, message: 'Apikey tidak valid.' });
+    if (!apikey) {
+    return res.status(400).json({ status: false, message: 'apikey wajib diisi' });
+  }
+
+  const { data, error } = await supabase
+    .from('apikeys')
+    .select('apikey')
+    .eq('apikey', apikey)
+    .single(); // ← GUNAKAN INI
+
+  if (error || !data || data.apikey !== apikey) {
+    return res.status(401).json({ status: false, message: 'Apikey tidak ditemukan di database.' });
+  }
     if (!username || !password) return res.status(400).json({ status: false, message: 'Username atau password kosong.' });
 
     try {
@@ -117,8 +129,20 @@ module.exports = function (app) {
   // 🔐 Verifikasi OTP
   app.get('/orderkuotav2/otp', async (req, res) => {
     const { username, otp, apikey } = req.query;
-    if (!global.apikey.includes(apikey)) return res.status(401).json({ status: false, message: 'Apikey tidak valid.' });
-    if (!username || !otp) return res.status(400).json({ status: false, message: 'Username atau OTP kosong.' });
+ if (!apikey) {
+    return res.status(400).json({ status: false, message: 'apikey wajib diisi' });
+  }
+
+  const { data, error } = await supabase
+    .from('apikeys')
+    .select('apikey')
+    .eq('apikey', apikey)
+    .single(); // ← GUNAKAN INI
+
+  if (error || !data || data.apikey !== apikey) {
+    return res.status(401).json({ status: false, message: 'Apikey tidak ditemukan di database.' });
+  }
+  if (!username || !otp) return res.status(400).json({ status: false, message: 'Username atau OTP kosong.' });
 
     try {
       const result = await loginOrderkuota(username, otp);
