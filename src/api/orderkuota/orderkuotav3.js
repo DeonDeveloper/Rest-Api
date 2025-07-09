@@ -72,7 +72,7 @@ export default async function handler(req, res) {
     if (method !== 'GET') return res.status(405).json({ status: false, message: 'Metode tidak diizinkan.' });
 
   try {
-    if (url.includes('/login')) {
+    if (url.includes('/orderkuotav3/login')) {
       if (!global.apikey.includes(apikey)) return res.status(401).json({ status: false, message: "Apikey tidak valid." });
 
       if (!username || !password) return res.status(400).json({ status: false, message: 'Username/password kosong' });
@@ -80,7 +80,7 @@ export default async function handler(req, res) {
       return res.json({ status: true, result });
     }
 
-    if (url.includes('/otp')) {
+    if (url.includes('/orderkuotav3/otp')) {
       if (!global.apikey.includes(apikey)) return res.status(401).json({ status: false, message: "Apikey tidak valid." });
 
       if (!username || !otp) return res.status(400).json({ status: false, message: 'Username/OTP kosong' });
@@ -89,7 +89,7 @@ export default async function handler(req, res) {
       return res.json({ status: true, result });
     }
 
-    if (url.includes('/mutasi')) {
+    if (url.includes('/orderkuotav3/mutasi')) {
       if (!global.apikey.includes(apikey)) return res.status(401).json({ status: false, message: "Apikey tidak valid." });
 
       const token = tokenCache[username];
