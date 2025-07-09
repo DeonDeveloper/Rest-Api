@@ -169,10 +169,10 @@ module.exports = function (app) {
     .from('apikeys')
     .select('apikey')
     .eq('apikey', apikey)
-    .single(); // hanya ambil satu baris
+    .single(); // ← GUNAKAN INI
 
-  if (error || !data) {
-    return res.status(401).json({ status: false, message: 'Apikey tidak ditemukan atau tidak valid.' });
+  if (error || !data || data.apikey !== apikey) {
+    return res.status(401).json({ status: false, message: 'Apikey tidak ditemukan di database.' });
   }
 
   try {
