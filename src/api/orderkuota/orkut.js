@@ -7,7 +7,7 @@ const fs = require('fs');
 // 🔐 Inisialisasi Firebase Admin SDK
 admin.initializeApp({
   credential: admin.credential.cert(require('./firebase-adminsdk.json')),
-  databaseURL: 'https://<PROJECT_ID>.firebaseio.com' // Ganti dengan Firebase Project URL kamu
+  databaseURL: 'https://fir-69867-default-rtdb.asia-southeast1.firebasedatabase.app' // Ganti dengan Firebase Project URL kamu
 });
 
 const db = admin.firestore();
