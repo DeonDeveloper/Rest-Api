@@ -134,22 +134,31 @@ module.exports = function (app) {
 
   // 💰 QRIS mutasi
   app.get('/orderkuotav2/mutasi', async (req, res) => {
-    const { username, apikey } = req.query;
-    const { data, error } = await supabase
-  .from('apikeys')
-  .select('apikey')
-  .eq('apikey', apikey)
-  .maybeSingle();
+  const { username, apikey } = req.query;
 
-if (error || !data) {
-  return res.status(401).json({ status: false, message: 'Apikey tidak ditemukan di database.' });
-}
+  if (!apikey) {
+    return res.status(400).json({ status: false, message: 'apikey wajib diisi' });
+  }
 
-    try {
-      const result = await getMutasi(username);
-      return res.json({ status: true, result });
-    } catch (error) {
-      return res.status(500).json({ status: false, message: error.message });
-    }
-  });
+  const { data, error } = await supabase
+    .from('apikeys')
+    .select('apikey')
+    .eq('apikey', apikey)
+    .maybeSingle();
+
+  console.log('DATA:', data);
+  console.log('ERROR:', error);
+
+  if (error || !data || !data.apikey) {
+    return res.status(401).json({ status: false, message: 'Apikey tidak ditemukan di database.' });
+  }
+
+  try {
+    const result = await getMutasi(username);
+    return res.json({ status: true, result });
+  } catch (error) {
+    return res.status(500).json({ status: false, message: error.message });
+  }
+});
+
 };
