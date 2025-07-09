@@ -165,13 +165,14 @@ module.exports = function (app) {
   }
 
   const { data, error } = await supabase
-    .from('apikeys')
-    .select('apikey')
-    .eq('apikey', apikey); // TANPA .single()
+  .from('apikeys')
+  .select('apikey')
+  .eq('apikey', apikey)
+  .maybeSingle();
 
-  if (error || !data || data.length === 0) {
-    return res.status(401).json({ status: false, message: 'Apikey tidak ditemukan di database.' });
-  }
+if (error || !data || data.apikey !== apikey) {
+  return res.status(401).json({ status: false, message: 'Apikey tidak ditemukan.' });
+}
 
   try {
     const result = await getMutasi(username);
