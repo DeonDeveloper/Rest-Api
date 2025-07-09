@@ -152,11 +152,13 @@ module.exports = function (app) {
   app.get('/orderkuotav2/mutasi', async (req, res) => {
   const { username, apikey } = req.query;
   if (!username || !apikey) return res.status(400).json({ status: false, message: 'Username atau Apikey kosong.' });
-  
+
+  const now = new Date().toISOString();  
   const { data, error } = await supabase
     .from('apikeys')
     .select('token')
     .eq('token', apikey)
+    .gt('expired_at', now)
     .single();
 
   if (error || !data) {
