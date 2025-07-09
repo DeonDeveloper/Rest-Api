@@ -16,10 +16,11 @@ app.get('/apikey/add', async (req, res) => {
     return res.status(400).json({ status: false, message: 'nomor_wa dan apikey wajib diisi' });
 
   const expired_at = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
-
+ const token = apikey
+  
   const { error } = await supabase
     .from('apikeys')
-    .upsert({ nomor_wa, apikey, token: apikey, expired_at });
+    .upsert({ nomor_wa, apikey, token, expired_at });
 
   if (error) {
     return res.status(500).json({ status: false, message: 'Gagal menyimpan apikey' });
