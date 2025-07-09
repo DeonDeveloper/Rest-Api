@@ -164,18 +164,23 @@ module.exports = function (app) {
     return res.status(400).json({ status: false, message: 'apikey wajib diisi' });
   }
 
+  // Lakukan query ke Supabase
   const { data, error } = await supabase
     .from('apikeys')
-    .select('apikey')
+    .select('apikey') // pastikan nama kolomnya PERSIS 'apikey' di Supabase
     .eq('apikey', apikey);
 
+  console.log('[DEBUG] Dapatkan hasil dari Supabase:', data);
+
+  // Jika error dari Supabase
   if (error) {
-    console.error('❌ Supabase error:', error);
-    return res.status(500).json({ status: false, message: 'Gagal validasi apikey.' });
+    console.error('[Supabase Error]', error);
+    return res.status(500).json({ status: false, message: 'Gagal mengecek apikey.' });
   }
 
-  if (!Array.isArray(data) || data.length === 0) {
-    return res.status(401).json({ status: false, message: 'Apikey tidak ditemukan di database.' });
+  // Jika apikey tidak ditemukan
+  if (!data || !Array.isArray(data) || data.length === 0) {
+    return res.status(401).json({ status: false, message: 'Apikey tidak ditemukan.' });
   }
 
   try {
