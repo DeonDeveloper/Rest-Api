@@ -1,8 +1,5 @@
-const express = require('express');
-const { createClient } = require('@supabase/supabase-js');
 
-const app = express();
-const PORT = process.env.PORT || 3000;
+const { createClient } = require('@supabase/supabase-js');
 
 // Inisialisasi Supabase
 const supabase = createClient(
@@ -82,9 +79,4 @@ app.get('/apikey/cek', async (req, res) => {
     return res.status(403).json({ status: false, message: 'Apikey tidak valid atau sudah expired' });
 
   return res.json({ status: true, message: 'Apikey masih aktif', expired_at: data.expired_at });
-});
-
-// ✅ Jalankan Server
-app.listen(PORT, () => {
-  console.log(`✅ Server berjalan di http://localhost:${PORT}`);
 });
