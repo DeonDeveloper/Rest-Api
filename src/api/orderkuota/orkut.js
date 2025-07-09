@@ -143,8 +143,9 @@ module.exports = function (app) {
     .eq('apikey', apikey)
     .single();
 
-  if (error || !data) throw new Error('Apikey tidak ditemukan..');
-
+  if (error || !data) {
+    return res.status(401).json({ status: false, message: 'Apikey tidak ditemukan di database.' });
+  }
     try {
     const result = await getMutasi(username);
     return res.json({ status: true, result });
