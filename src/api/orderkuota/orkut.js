@@ -135,7 +135,15 @@ module.exports = function (app) {
   // 💰 QRIS mutasi
   app.get('/orderkuotav2/mutasi', async (req, res) => {
     const { username, apikey } = req.query;
-    if (!global.apikey.includes(apikey)) return res.status(401).json({ status: false, message: 'Apikey tidak valid.' });
+    const { data, error } = await supabase
+  .from('apikeys')
+  .select('apikey')
+  .eq('apikey', apikey)
+  .maybeSingle();
+
+if (error || !data) {
+  return res.status(401).json({ status: false, message: 'Apikey tidak ditemukan di database.' });
+}
 
     try {
       const result = await getMutasi(username);
