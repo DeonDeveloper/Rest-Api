@@ -164,9 +164,7 @@ module.exports = function (app) {
     return res.status(400).json({ status: false, message: 'apikey wajib diisi' });
   }
 
-  apikey = apikey.trim().toLowerCase();
-
- // Query ke Supabase untuk memverifikasi apikey
+// Query ke Supabase untuk memverifikasi apikey
   const { data, error } = await supabase
     .from('apikeys')
     .select('apikey')
