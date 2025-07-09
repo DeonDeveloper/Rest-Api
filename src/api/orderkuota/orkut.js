@@ -97,14 +97,16 @@ module.exports = function (app) {
   // 🔐 Login / trigger OTP
   app.get('/orderkuotav2/login', async (req, res) => {
     const { username, password, apikey } = req.query;
-    const { data, error } = await supabase
+    const now = new Date().toISOString();  
+  const { data, error } = await supabase
     .from('apikeys')
     .select('token')
     .eq('token', apikey)
+    .gt('expired_at', now)
     .single();
 
   if (error || !data) {
-    return res.status(401).json({ status: false, message: 'Apikey tidak ditemukan di database.' });
+    return res.status(401).json({ status: false, message: 'Apikey tidak ditemukan atau sudah expired' });
   }
     if (!username || !password) return res.status(400).json({ status: false, message: 'Username atau password kosong.' });
 
@@ -125,14 +127,16 @@ module.exports = function (app) {
   // 🔐 Verifikasi OTP
   app.get('/orderkuotav2/otp', async (req, res) => {
     const { username, otp, apikey } = req.query;
- const { data, error } = await supabase
+ const now = new Date().toISOString();  
+  const { data, error } = await supabase
     .from('apikeys')
     .select('token')
     .eq('token', apikey)
+    .gt('expired_at', now)
     .single();
 
   if (error || !data) {
-    return res.status(401).json({ status: false, message: 'Apikey tidak ditemukan di database.' });
+    return res.status(401).json({ status: false, message: 'Apikey tidak ditemukan atau sudah expired' });
   }
     if (!username || !otp) return res.status(400).json({ status: false, message: 'Username atau OTP kosong.' });
 
@@ -162,7 +166,7 @@ module.exports = function (app) {
     .single();
 
   if (error || !data) {
-    return res.status(401).json({ status: false, message: 'Apikey tidak ditemukan di database.' });
+    return res.status(401).json({ status: false, message: 'Apikey tidak ditemukan atau sudah expired' });
   }
     try {
     const result = await getMutasi(username);
