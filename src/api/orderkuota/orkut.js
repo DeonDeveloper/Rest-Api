@@ -136,8 +136,15 @@ module.exports = function (app) {
   app.get('/orderkuotav2/mutasi', async (req, res) => {
   const { username, apikey } = req.query;
 
-  if (!global.apikey.includes(apikey)) return res.status(401).json({ status: false, message: 'Apikey tidak valid.' });
-  try {
+  const { data, error } = await supabase
+    .from('apikeys')
+    .select('apikey')
+    .eq('apikey', apikey)
+    .single();
+
+  if (error || !data) throw new Error('Apikey tidak ditemukan..');
+
+    try {
     const result = await getMutasi(username);
     return res.json({ status: true, result });
   } catch (error) {
