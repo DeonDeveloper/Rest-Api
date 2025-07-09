@@ -1,5 +1,4 @@
 const axios = require('axios');
-const crypto = require('crypto');
 const qs = require('qs');
 const admin = require('firebase-admin');
 
@@ -17,8 +16,8 @@ const APP_REG_ID = 'di309HvATsaiCppl5eDpoc:APA91bFUcTOH8h2XHdPRz2qQ5Bezn-3_TaycF
 const APP_VERSION_CODE = '250314';
 const APP_VERSION_NAME = '25.03.14';
 
-// Fungsi login (password atau OTP dipisah jadi dua fungsi jika ingin eksplisit)
-async function loginWithPassword(username, password) {
+// Fungsi login (password atau OTP)
+async function loginOrderkuota(username, password) {
   const payload = qs.stringify({
     username,
     password,
@@ -60,10 +59,6 @@ async function loginWithPassword(username, password) {
   throw new Error(data?.message || 'Login gagal');
 }
 
-async function loginWithOtp(username, otp) {
-  return await loginWithPassword(username, otp); // OTP dikirim sebagai "password"
-}
-
 // Fungsi ambil mutasi
 async function getMutasi(username) {
   const doc = await tokenRef.doc(username).get();
@@ -99,13 +94,16 @@ async function getMutasi(username) {
 
 // Express Routes
 module.exports = function (app) {
+  // 🔐 LOGIN: Password atau trigger OTP
   app.get('/orderkuotav2/login', async (req, res) => {
     const { username, password, apikey } = req.query;
     if (!global.apikey.includes(apikey)) return res.status(401).json({ status: false, message: 'Apikey tidak valid.' });
-    if (!username || !password) return res.status(400).json({ status: false, message: 'Username atau password kosong.' });
+
+    if (!username || !password)
+      return res.status(400).json({ status: false, message: 'Username atau password kosong.' });
 
     try {
-      const result = await loginWithPassword(username, password);
+      const result = await loginOrderkuota(username, password);
       if (result.status === 'otp_sent') {
         return res.json({ status: true, otp_sent: true, message: result.message });
       } else if (result.status === 'token_ok') {
@@ -118,13 +116,16 @@ module.exports = function (app) {
     }
   });
 
+  // 🔐 OTP VERIFIKASI
   app.get('/orderkuotav2/otp', async (req, res) => {
     const { username, otp, apikey } = req.query;
     if (!global.apikey.includes(apikey)) return res.status(401).json({ status: false, message: 'Apikey tidak valid.' });
-    if (!username || !otp) return res.status(400).json({ status: false, message: 'Username atau OTP kosong.' });
+
+    if (!username || !otp)
+      return res.status(400).json({ status: false, message: 'Username atau OTP kosong.' });
 
     try {
-      const result = await loginWithOtp(username, otp);
+      const result = await loginOrderkuota(username, otp); // OTP sebagai "password"
       if (result.status === 'token_ok') {
         return res.json({ status: true, token: result.token });
       } else {
@@ -135,6 +136,7 @@ module.exports = function (app) {
     }
   });
 
+  // 🧾 Ambil Mutasi
   app.get('/orderkuotav2/mutasi', async (req, res) => {
     const { username, apikey } = req.query;
     if (!global.apikey.includes(apikey)) return res.status(401).json({ status: false, message: 'Apikey tidak valid.' });
