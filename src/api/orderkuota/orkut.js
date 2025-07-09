@@ -167,10 +167,9 @@ module.exports = function (app) {
   const { data, error } = await supabase
     .from('apikeys')
     .select('apikey')
-    .eq('apikey', apikey);
-    
+    .eq('apikey', apikey); // TANPA .single()
 
-  if (error || !data || data.apikey !== apikey) {
+  if (error || !data || data.length === 0) {
     return res.status(401).json({ status: false, message: 'Apikey tidak ditemukan di database.' });
   }
 
