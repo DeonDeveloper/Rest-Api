@@ -6,10 +6,9 @@ const admin = require('firebase-admin');
 require('dotenv').config();
 
 if (!admin.apps.length) {
-  const serviceAccount = JSON.parse(Buffer.from(process.env.FIREBASE_CREDENTIAL_BASE64, 'base64').toString('utf8'));
-  
+  const path = process.env.FIREBASE_CREDENTIAL_PATH;
   admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
+    credential: admin.credential.cert(require(path)),
     databaseURL: 'https://fir-69867-default-rtdb.asia-southeast1.firebasedatabase.app'
   });
 }
