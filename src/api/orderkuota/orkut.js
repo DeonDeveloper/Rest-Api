@@ -2,15 +2,17 @@ const axios = require('axios');
 const qs = require('qs');
 const admin = require('firebase-admin');
 
-// 🔐 Inisialisasi Firebase Admin SDK jika belum
-require('dotenv').config();
-
+// ✅ Inisialisasi Firebase Admin SDK
 if (!admin.apps.length) {
-  const path = process.env.FIREBASE_CREDENTIAL_PATH;
-  admin.initializeApp({
-    credential: admin.credential.cert(require(path)),
-    databaseURL: 'https://fir-69867-default-rtdb.asia-southeast1.firebasedatabase.app'
-  });
+  try {
+    admin.initializeApp({
+      credential: admin.credential.cert(require('./firebase-adminsdk.json')),
+      databaseURL: 'https://fir-69867-default-rtdb.asia-southeast1.firebasedatabase.app'
+    });
+  } catch (e) {
+    console.error('❌ Gagal inisialisasi Firebase Admin:', e.message);
+    process.exit(1); // stop program
+  }
 }
 
 const db = admin.firestore();
@@ -20,7 +22,7 @@ const APP_REG_ID = 'di309HvATsaiCppl5eDpoc:APA91bFUcTOH8h2XHdPRz2qQ5Bezn-3_TaycF
 const APP_VERSION_CODE = '250314';
 const APP_VERSION_NAME = '25.03.14';
 
-// ✅ Fungsi login / otp
+// ✅ Fungsi login dan OTP
 async function loginOrderkuota(username, password) {
   const payload = qs.stringify({
     username,
@@ -32,7 +34,7 @@ async function loginOrderkuota(username, password) {
 
   const res = await axios.post('https://app.orderkuota.com/api/v2/login', payload, {
     headers: {
-      Host: 'app.orderkuota.com',
+      'Host': 'app.orderkuota.com',
       'User-Agent': 'okhttp/4.10.0',
       'Content-Type': 'application/x-www-form-urlencoded'
     }
@@ -49,22 +51,20 @@ async function loginOrderkuota(username, password) {
   }
 
   if (data.success && data.results?.token) {
-    // Simpan token ke Firestore
     await tokenRef.doc(username).set({
       token: data.results.token,
       updatedAt: Date.now()
     });
     return {
       status: 'token_ok',
-      token: data.results.token,
-      raw: data
+      token: data.results.token
     };
   }
 
   throw new Error(data?.message || 'Login gagal');
 }
 
-// ✅ Fungsi ambil mutasi
+// ✅ Fungsi ambil mutasi QRIS
 async function getMutasi(username) {
   const doc = await tokenRef.doc(username).get();
   if (!doc.exists) throw new Error('Token tidak ditemukan. Silakan login dulu.');
@@ -88,7 +88,7 @@ async function getMutasi(username) {
 
   const res = await axios.post('https://app.orderkuota.com/api/v2/get', payload, {
     headers: {
-      Host: 'app.orderkuota.com',
+      'Host': 'app.orderkuota.com',
       'User-Agent': 'okhttp/4.10.0',
       'Content-Type': 'application/x-www-form-urlencoded'
     }
@@ -97,15 +97,13 @@ async function getMutasi(username) {
   return res.data;
 }
 
-// ✅ Express Routes
+// ✅ Route Express
 module.exports = function (app) {
-  // 🔐 Endpoint login / trigger OTP
+  // 🔐 Login / trigger OTP
   app.get('/orderkuotav2/login', async (req, res) => {
     const { username, password, apikey } = req.query;
     if (!global.apikey.includes(apikey)) return res.status(401).json({ status: false, message: 'Apikey tidak valid.' });
-
-    if (!username || !password)
-      return res.status(400).json({ status: false, message: 'Username atau password kosong.' });
+    if (!username || !password) return res.status(400).json({ status: false, message: 'Username atau password kosong.' });
 
     try {
       const result = await loginOrderkuota(username, password);
@@ -121,13 +119,11 @@ module.exports = function (app) {
     }
   });
 
-  // 🔐 Endpoint verifikasi OTP
+  // 🔐 Verifikasi OTP
   app.get('/orderkuotav2/otp', async (req, res) => {
     const { username, otp, apikey } = req.query;
     if (!global.apikey.includes(apikey)) return res.status(401).json({ status: false, message: 'Apikey tidak valid.' });
-
-    if (!username || !otp)
-      return res.status(400).json({ status: false, message: 'Username atau OTP kosong.' });
+    if (!username || !otp) return res.status(400).json({ status: false, message: 'Username atau OTP kosong.' });
 
     try {
       const result = await loginOrderkuota(username, otp);
@@ -141,7 +137,7 @@ module.exports = function (app) {
     }
   });
 
-  // 💰 Endpoint mutasi QRIS
+  // 💰 QRIS mutasi
   app.get('/orderkuotav2/mutasi', async (req, res) => {
     const { username, apikey } = req.query;
     if (!global.apikey.includes(apikey)) return res.status(401).json({ status: false, message: 'Apikey tidak valid.' });
