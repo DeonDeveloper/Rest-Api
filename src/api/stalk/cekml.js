@@ -339,9 +339,17 @@ module.exports = function (app) {
   app.get('/stalk/mlbb-first', async (req, res) => {
     const { apikey, userId, zoneId } = req.query;
 
-    if (!global.apikey || !global.apikey.includes(apikey)) {
-      return res.json({ status: false, message: "Apikey tidak valid." });
-    }
+    const now = new Date().toISOString();  
+  const { data, error } = await supabase
+    .from('apikeys')
+    .select('token')
+    .eq('token', apikey)
+    .gt('expired_at', now)
+    .single();
+
+  if (error || !data) {
+    return res.status(401).json({ status: false, message: 'Apikey tidak ditemukan atau sudah expired' });
+  }
 
     if (!userId || !zoneId) {
       return res.status(400).json({ status: false, message: 'Parameter userId dan zoneId harus diisi.' });
