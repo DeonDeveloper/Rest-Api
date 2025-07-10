@@ -345,31 +345,34 @@ async function getMLFirstTopup(userId, zoneId) {
 module.exports = function (app) {
 
 app.get('/stalk/mlbb-bind', async (req, res) => {
-  const { userId, serverId, apikey } = req.query;
+  const { apikey, userId, serverId } = req.query;
 
-  if (!userId || !serverId || !apikey) {
+  if (!apikey || !userId || !serverId) {
     return res.status(400).json({
       status: false,
-      message: 'Parameter userId, serverId, dan apikey harus diisi.'
+      message: 'Parameter apikey, userId, dan serverId harus diisi.'
     });
   }
 
-  const now = new Date().toISOString();  
-  const { data, error } = await supabase
+  // 🔐 Validasi apikey di Supabase
+  const now = new Date().toISOString();
+  const { data: apikeyData, error } = await supabase
     .from('apikeys')
     .select('token')
     .eq('token', apikey)
     .gt('expired_at', now)
     .single();
 
-  if (error || !data) {
-    return res.status(401).json({ status: false, message: 'Apikey tidak ditemukan atau sudah expired' });
+  if (error || !apikeyData) {
+    return res.status(401).json({
+      status: false,
+      message: 'Apikey tidak ditemukan atau sudah kadaluarsa.'
+    });
   }
 
-
   try {
-    const url = `https://api.arbakti.monster/api/validasi/mlbb/bind?userId=${userId}&serverId=${serverId}&apikey=ARBAKTI`;
-    const response = await fetch(url);
+    const apiUrl = `https://api.arbakti.monster/api/validasi/mlbb/bind?userId=${userId}&serverId=${serverId}&apikey=${apikey}`;
+    const response = await fetch(apiUrl);
     const result = await response.json();
 
     if (!result?.status) {
@@ -390,16 +393,16 @@ app.get('/stalk/mlbb-bind', async (req, res) => {
       binding: data.binding,
       device: data.device
     });
-  } catch (error) {
-    console.error('[MLBB VALIDATION ERROR]', error);
+
+  } catch (err) {
+    console.error('Gagal mengambil data MLBB:', err);
     return res.status(500).json({
       status: false,
-      message: 'Gagal memproses permintaan.',
-      error: error.message
+      message: 'Terjadi kesalahan server.',
+      error: err.message
     });
   }
-}
-
+});
   
   app.get('/stalk/mlbb-first', async (req, res) => {
     const { apikey, userId, zoneId } = req.query;
