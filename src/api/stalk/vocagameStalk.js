@@ -5,9 +5,17 @@ module.exports = function (app) {
     try {
       const { apikey, id } = req.query;
       if (!id) return res.status(400).json({ error: 'Parameter "id" wajib diisi' });
-      const check = global.apikey
-      if (!global.apikey.includes(apikey)) return res.json("Apikey tidak valid.")
-      
+      const now = new Date().toISOString();  
+  const { data, error } = await supabase
+    .from('apikeys')
+    .select('token')
+    .eq('token', apikey)
+    .gt('expired_at', now)
+    .single();
+
+  if (error || !data) {
+    return res.status(401).json({ status: false, message: 'Apikey tidak ditemukan atau sudah expired' });
+  }
       const url = `https://api.vocagame.com/v1/order/prepare/SUPER_SUS?userId=${id}&zoneId=undefined`;
       const response = await fetch(url);
       const data = await response.json();
@@ -26,9 +34,17 @@ module.exports = function (app) {
     try {
       const { apikey, id } = req.query;
       if (!id) return res.status(400).json({ error: 'Parameter "id" wajib diisi' });
-      const check = global.apikey
-      if (!global.apikey.includes(apikey)) return res.json("Apikey tidak valid.")
+      const now = new Date().toISOString();  
+  const { data, error } = await supabase
+    .from('apikeys')
+    .select('token')
+    .eq('token', apikey)
+    .gt('expired_at', now)
+    .single();
 
+  if (error || !data) {
+    return res.status(401).json({ status: false, message: 'Apikey tidak ditemukan atau sudah expired' });
+  }
       const url = `https://api.vocagame.com/v1/order/prepare/HOK?userId=${id}&zoneId=undefined`;
       const response = await fetch(url);
       const data = await response.json();
@@ -47,9 +63,17 @@ module.exports = function (app) {
     try {
       const { apikey, id } = req.query;
       if (!id) return res.status(400).json({ error: 'Parameter "id" wajib diisi' });
-      const check = global.apikey
-      if (!global.apikey.includes(apikey)) return res.json("Apikey tidak valid.")
+      const now = new Date().toISOString();  
+  const { data, error } = await supabase
+    .from('apikeys')
+    .select('token')
+    .eq('token', apikey)
+    .gt('expired_at', now)
+    .single();
 
+  if (error || !data) {
+    return res.status(401).json({ status: false, message: 'Apikey tidak ditemukan atau sudah expired' });
+  }
       
       const url = `https://api.vocagame.com/v1/order/prepare/PUBGM?userId=${id}&zoneId=undefined`;
       const response = await fetch(url);
