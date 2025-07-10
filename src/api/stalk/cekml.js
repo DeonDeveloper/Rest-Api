@@ -355,19 +355,16 @@ app.get('/stalk/mlbb-bind', async (req, res) => {
   }
 
   // 🔐 Validasi apikey di Supabase
-  const now = new Date().toISOString();
-  const { data: apikeyData, error } = await supabase
+  const now = new Date().toISOString();  
+  const { data, error } = await supabase
     .from('apikeys')
     .select('token')
     .eq('token', apikey)
     .gt('expired_at', now)
     .single();
 
-  if (error || !apikeyData) {
-    return res.status(401).json({
-      status: false,
-      message: 'Apikey tidak ditemukan atau sudah kadaluarsa.'
-    });
+  if (error || !data) {
+    return res.status(401).json({ status: false, message: 'Apikey tidak ditemukan atau sudah expired' });
   }
 
   try {
