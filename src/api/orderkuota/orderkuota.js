@@ -139,8 +139,17 @@ async function checkQRISStatus() {
 module.exports = function(app) {
 app.get('/orderkuota/createpayment', async (req, res) => {
     const { apikey, amount, codeqr} = req.query;
-    const check = global.apikey
-    if (!global.apikey.includes(apikey)) return res.json("Apikey tidak valid.")
+    const now = new Date().toISOString();  
+  const { data, error } = await supabase
+    .from('apikeys')
+    .select('token')
+    .eq('token', apikey)
+    .gt('expired_at', now)
+    .single();
+
+  if (error || !data) {
+    return res.status(401).json({ status: false, message: 'Apikey tidak ditemukan atau sudah expired' });
+  }
     try {
         const qrData = await createQRIS(amount, codeqr);
         res.status(200).json({
@@ -154,11 +163,17 @@ app.get('/orderkuota/createpayment', async (req, res) => {
     
 app.get('/orderkuota/cekstatus', async (req, res) => {
     const { merchant, apikey } = req.query;
-    const check = global.apikey;
+    const now = new Date().toISOString();  
+  const { data, error } = await supabase
+    .from('apikeys')
+    .select('token')
+    .eq('token', apikey)
+    .gt('expired_at', now)
+    .single();
 
-    if (!check.includes(apikey)) {
-        return res.status(401).json({ status: false, message: "Apikey tidak valid." });
-    }
+  if (error || !data) {
+    return res.status(401).json({ status: false, message: 'Apikey tidak ditemukan atau sudah expired' });
+  }
 
     try {
         const apiUrl = `https://api.hamsoffc.me/orkut/mutasi?apikey=HAMS-c2b941909b5e&merchant=${merchant}`;
