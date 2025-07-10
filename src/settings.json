@@ -336,6 +336,12 @@
           "innerDesc": "Buy apikey >> wa.me/6285784856257"
         }, 
         {
+          "name": "Mobile Legends Bind Stalk",
+          "desc": "Stalk mobile legends bind account",
+          "path": "/stalk/mlbb-bind?apikey=&userId=&zoneId=", 
+          "innerDesc": "Buy apikey >> wa.me/6285784856257"
+        }, 
+        {
           "name": "Genshin Impact Stalk",
           "desc": "Stalk genshin impact account",
           "path": "/stalk/genshin?apikey=&uid=", 
