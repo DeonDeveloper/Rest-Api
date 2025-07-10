@@ -20,9 +20,17 @@ async function stalkGenshin(uid) {
 module.exports = function (app) {
   app.get('/stalk/genshin', async (req, res) => {
     const { apikey, uid } = req.query;
-    const check = global.apikey
-    if (!global.apikey.includes(apikey)) return res.json("Apikey tidak valid.")
-    
+    const now = new Date().toISOString();  
+  const { data, error } = await supabase
+    .from('apikeys')
+    .select('token')
+    .eq('token', apikey)
+    .gt('expired_at', now)
+    .single();
+
+  if (error || !data) {
+    return res.status(401).json({ status: false, message: 'Apikey tidak ditemukan atau sudah expired' });
+  }
     if (!uid) {
       return res.status(400).json({
         status: false,
