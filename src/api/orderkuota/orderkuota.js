@@ -5,6 +5,13 @@ const FormData = require('form-data');
 const QRCode = require('qrcode');
 const bodyParser = require('body-parser');
 const { ImageUploadService } = require('node-upload-images')
+const { createClient } = require('@supabase/supabase-js');
+
+// ✅ Inisialisasi Supabase
+const supabase = createClient(
+  'https://yohjdlqqeoxvsmhadoqn.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlvaGpkbHFxZW94dnNtaGFkb3FuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTIwMzU3NDAsImV4cCI6MjA2NzYxMTc0MH0.eH4cOXY1w58xPrcq8IP4AyU5P3RArAZ_SXd023DsIog'
+);
 
 function convertCRC16(str) {
     let crc = 0xFFFF;
