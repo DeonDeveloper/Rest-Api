@@ -345,7 +345,7 @@ async function getMLFirstTopup(userId, zoneId) {
 module.exports = function (app) {
 
 app.get('/stalk/mlbb-bind', async (req, res) => {
-  const { apikey, userId, serverId } = req.query;
+  const { apikey, userId, zoneId } = req.query;
 
   if (!userId || !zoneId) {
       return res.status(400).json({ status: false, message: 'Parameter userId dan zoneId harus diisi.' });
@@ -365,7 +365,7 @@ app.get('/stalk/mlbb-bind', async (req, res) => {
   }
 
   try {
-    const apiUrl = `https://api.arbakti.monster/api/validasi/mlbb/bind?userId=${userId}&serverId=${serverId}&apikey=ARBAKTI`;
+    const apiUrl = `https://api.arbakti.monster/api/validasi/mlbb/bind?userId=${userId}&serverId=${zoneId}&apikey=ARBAKTI`;
     const response = await fetch(apiUrl);
     const result = await response.json();
 
