@@ -25,10 +25,10 @@ module.exports = function (app) {
   }
       const url = `https://api.vocagame.com/v1/order/prepare/SUPER_SUS?userId=${id}&zoneId=undefined`;
       const response = await fetch(url);
-      const data = await response.json();
+      const dataa = await response.json();
 
-      if (data.message === 'Success') {
-        res.json({ status: true, id, nickname: data.data });
+      if (dataa.message === 'Success') {
+        res.json({ status: true, id, nickname: dataa.data });
       } else {
         res.status(404).json({ error: 'Username tidak ditemukan' });
       }
@@ -54,10 +54,10 @@ module.exports = function (app) {
   }
       const url = `https://api.vocagame.com/v1/order/prepare/HOK?userId=${id}&zoneId=undefined`;
       const response = await fetch(url);
-      const data = await response.json();
+      const dataa = await response.json();
 
-      if (data.message === 'Success') {
-        res.json({ status: true, id, nickname: data.data });
+      if (dataa.message === 'Success') {
+        res.json({ status: true, id, nickname: dataa.data });
       } else {
         res.status(404).json({ error: 'Username tidak ditemukan' });
       }
@@ -84,10 +84,10 @@ module.exports = function (app) {
       
       const url = `https://api.vocagame.com/v1/order/prepare/PUBGM?userId=${id}&zoneId=undefined`;
       const response = await fetch(url);
-      const data = await response.json();
+      const dataa = await response.json();
 
-      if (data.message === 'Success') {
-        res.json({ status: true, id, nickname: data.data });
+      if (dataa.message === 'Success') {
+        res.json({ status: true, id, nickname: dataa.data });
       } else {
         res.status(404).json({ error: 'Username tidak ditemukan' });
       }
