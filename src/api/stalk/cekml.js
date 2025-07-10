@@ -368,7 +368,7 @@ app.get('/stalk/mlbb-bind', async (req, res) => {
 
 
   try {
-    const url = `https://api.arbakti.monster/api/validasi/mlbb/bind?userId=${userId}&serverId=${serverId}&apikey=${apikey}`;
+    const url = `https://api.arbakti.monster/api/validasi/mlbb/bind?userId=${userId}&serverId=${serverId}&apikey=ARBAKTI`;
     const response = await fetch(url);
     const result = await response.json();
 
