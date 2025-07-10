@@ -347,12 +347,9 @@ module.exports = function (app) {
 app.get('/stalk/mlbb-bind', async (req, res) => {
   const { apikey, userId, serverId } = req.query;
 
-  if (!apikey || !userId || !serverId) {
-    return res.status(400).json({
-      status: false,
-      message: 'Parameter apikey, userId, dan serverId harus diisi.'
-    });
-  }
+  if (!userId || !zoneId) {
+      return res.status(400).json({ status: false, message: 'Parameter userId dan zoneId harus diisi.' });
+    }
 
   // 🔐 Validasi apikey di Supabase
   const now = new Date().toISOString();  
