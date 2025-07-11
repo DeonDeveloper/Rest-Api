@@ -65,7 +65,7 @@ module.exports = function (app) {
 
     await supabase.from('saldo_topup').insert({ username, trx_id, amount, status: 'Pending' });
 
-    res.json({ status: true, message: 'Tagihan dibuat', expired: 'Expired 5 menit:, trx_id, qr_url: result.data.qr_url });
+    res.json({ status: true, message: 'Tagihan dibuat', expired: 'Expired 5 menit', trx_id, qr_url: result.data.qr_url });
   } catch (e) {
     res.status(500).json({ status: false, message: 'Gagal membuat tagihan', error: e.message });
   }
