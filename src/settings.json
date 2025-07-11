@@ -58,9 +58,9 @@
           "innerDesc": "Buy apikey >> wa.me/6285784856257"          
         }, 
         {
-          "name": "Cek Histori",
-          "desc": "Cek histori", 
-          "path": "/gateway/histori?username=", 
+          "name": "Cek History",
+          "desc": "Cek history", 
+          "path": "/gateway/history?username=", 
           "innerDesc": "Buy apikey >> wa.me/6285784856257"          
         }, 
         {
