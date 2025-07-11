@@ -341,26 +341,8 @@ async function getMLFirstTopup(userId, zoneId) {
   }
 }
 
-// Fungsi fetch dengan timeout manual
-const fetchWithTimeout = async (url, options = {}, timeout = 10000) => {
-  const controller = new AbortController();
-  const id = setTimeout(() => controller.abort(), timeout);
-  options.signal = controller.signal;
-
-  try {
-    const response = await fetch(url, options);
-    clearTimeout(id);
-    return response;
-  } catch (error) {
-    clearTimeout(id);
-    throw error;
-  }
-};
-
-
 module.exports = function (app) {
-
-  app.get('/stalk/mlbb-bind', async (req, res) => {
+ app.get('/stalk/mlbb-bind', async (req, res) => {
     const { apikey, userId, zoneId } = req.query;
 
     if (!userId || !zoneId) {
@@ -370,7 +352,7 @@ module.exports = function (app) {
       });
     }
 
-    // 🔐 Validasi API key via Supabase
+    // 🔐 Validasi apikey di Supabase
     const now = new Date().toISOString();
     const { data, error } = await supabase
       .from('apikeys')
@@ -388,9 +370,9 @@ module.exports = function (app) {
 
     try {
       const apiUrl = `https://api.arbakti.monster/api/validasi/mlbb/bind?userId=${userId}&serverId=${zoneId}&apikey=ARBAKTI`;
-
-      const response = await fetchWithTimeout(apiUrl, {}, 10000); // timeout 10 detik
-      const result = await response.json();
+      
+      // Gunakan axios dengan timeout 10 detik
+      const { data: result } = await axios.get(apiUrl, { timeout: 10000 });
 
       if (!result?.status) {
         return res.status(404).json({
@@ -410,14 +392,14 @@ module.exports = function (app) {
         binding: data.binding,
         device: data.device,
       });
+
     } catch (err) {
-      console.error('Gagal mengambil data MLBB:', err);
+      console.error('Gagal mengambil data MLBB:', err.message);
       return res.status(500).json({
         status: false,
-        message:
-          err.name === 'AbortError'
-            ? 'Permintaan ke server terlalu lama, silakan coba lagi nanti.'
-            : 'Terjadi kesalahan server.',
+        message: err.code === 'ECONNABORTED'
+          ? 'Timeout: Server Arbakti terlalu lama merespon.'
+          : 'Terjadi kesalahan saat menghubungi server.',
         error: err.message,
       });
     }
