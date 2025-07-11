@@ -92,6 +92,12 @@
           "innerDesc": "Buy apikey >> wa.me/6285784856257"          
         }, 
         {
+          "name": "Cek Saldo",
+          "desc": "Cek saldo", 
+          "path": "/gateway/ceksaldo?username=", 
+          "innerDesc": "Buy apikey >> wa.me/6285784856257"          
+        }, 
+        {
           "name": "Withdraw Payment",
           "desc": "Withdraw payment", 
           "path": "/gateway/withdraw?username=&amount=&tujuan=", 
