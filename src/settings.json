@@ -38,7 +38,7 @@
     },
    {
       "name": "Payment Gateway",
-      "desc": "Payment gateway dengan fee 0,7%"
+      "desc": "Payment gateway fee 0,7%", 
       "items": [
         {
           "name": "Create Payment",
