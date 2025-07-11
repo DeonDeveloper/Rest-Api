@@ -401,8 +401,8 @@ app.get('/stalk/mlbb-bind', async (req, res) => {
     return res.status(200).json({
       status: true,
       nickname: data.nickname,
-      userId: data.playerId,
-      serverId: data.serverId,
+      userId, 
+      serverId, 
       region: data.region,
       binding: data.binding,
       device: data.device
