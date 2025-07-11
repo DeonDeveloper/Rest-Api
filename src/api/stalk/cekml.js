@@ -342,70 +342,7 @@ async function getMLFirstTopup(userId, zoneId) {
 }
 
 module.exports = function (app) {
- app.get('/stalk/mlbb-bind', async (req, res) => {
-    const { apikey, userId, zoneId } = req.query;
-
-    if (!userId || !zoneId) {
-      return res.status(400).json({
-        status: false,
-        message: 'Parameter userId dan zoneId harus diisi.',
-      });
-    }
-
-    // 🔐 Validasi apikey di Supabase
-    const now = new Date().toISOString();
-    const { data, error } = await supabase
-      .from('apikeys')
-      .select('token')
-      .eq('token', apikey)
-      .gt('expired_at', now)
-      .single();
-
-    if (error || !data) {
-      return res.status(401).json({
-        status: false,
-        message: 'Apikey tidak ditemukan atau sudah expired.',
-      });
-    }
-
-    try {
-      const apiUrl = `https://api.arbakti.monster/api/validasi/mlbb/bind?userId=${userId}&serverId=${zoneId}&apikey=ARBAKTI`;
-      
-      // Gunakan axios dengan timeout 10 detik
-      const { data: result } = await axios.get(apiUrl, { timeout: 50000 });
-
-      if (!result?.status) {
-        return res.status(404).json({
-          status: false,
-          message: result?.message || 'Data tidak ditemukan.',
-        });
-      }
-
-      const data = result.data;
-
-      return res.status(200).json({
-        status: true,
-        nickname: data.nickname,
-        userId: data.playerId,
-        serverId: data.serverId,
-        region: data.region,
-        binding: data.binding,
-        device: data.device,
-      });
-
-    } catch (err) {
-      console.error('Gagal mengambil data MLBB:', err.message);
-      return res.status(500).json({
-        status: false,
-        message: err.code === 'ECONNABORTED'
-          ? 'Timeout: Server Arbakti terlalu lama merespon.'
-          : 'Terjadi kesalahan saat menghubungi server.',
-        error: err.message,
-      });
-    }
-  });
-
-  app.get('/stalk/mlbb-first', async (req, res) => {
+app.get('/stalk/mlbb-first', async (req, res) => {
     const { apikey, userId, zoneId } = req.query;
 
     const now = new Date().toISOString();  
