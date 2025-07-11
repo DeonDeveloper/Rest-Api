@@ -15,26 +15,11 @@ const ZANN_SECRET = 'Uo1QZTCGSIrhERv8';
 const PIN = '111222';
 
 module.exports = function (app) {
-  // 🔐 Validasi API Key
-  async function validateApikey(apikey) {
-    const now = new Date().toISOString();
-    const { data, error } = await supabase
-      .from('apikeys')
-      .select('*')
-      .eq('token', apikey)
-      .gt('expired_at', now)
-      .single();
-    return !error && data;
-  }
-
-  // ✅ Buat Pembayaran QRIS
+    // ✅ Buat Pembayaran QRIS
   app.get('/gateway/createpayment', async (req, res) => {
-    const { username, amount, apikey } = req.query;
-    if (!username || !amount || !apikey)
+    const { username, amount } = req.query;
+    if (!username || !amount)
       return res.status(400).json({ status: false, message: 'Parameter kosong' });
-
-    if (!(await validateApikey(apikey)))
-      return res.status(401).json({ status: false, message: 'Apikey tidak valid/expired' });
 
     const trx_id = `TRX-${Date.now()}-${Math.floor(Math.random() * 9999)}`;
     const signature = crypto.createHash('sha256').update(ZANN_MERCHANT + ZANN_SECRET + trx_id).digest('hex');
@@ -64,13 +49,10 @@ module.exports = function (app) {
 
   // ✅ Cek Status Pembayaran
   app.get('/gateway/paymentstatus', async (req, res) => {
-    const { username, trx_id, apikey } = req.query;
-    if (!username || !trx_id || !apikey)
+    const { username, trx_id } = req.query;
+    if (!username || !trx_id)
       return res.status(400).json({ status: false, message: 'Parameter kosong' });
-
-    if (!(await validateApikey(apikey)))
-      return res.status(401).json({ status: false, message: 'Apikey tidak valid' });
-
+    
     const signature = crypto.createHash('sha256').update(ZANN_MERCHANT + ZANN_SECRET + trx_id).digest('hex');
 
     try {
@@ -94,13 +76,10 @@ module.exports = function (app) {
 
   // ✅ Cek Saldo
   app.get('/gateway/ceksaldo', async (req, res) => {
-    const { username, apikey } = req.query;
-    if (!username || !apikey)
+    const { username } = req.query;
+    if (!username)
       return res.status(400).json({ status: false, message: 'username dan apikey wajib diisi' });
-
-    if (!(await validateApikey(apikey)))
-      return res.status(401).json({ status: false, message: 'Apikey tidak valid' });
-
+    
     const now = new Date();
     const { data: topups } = await supabase
       .from('saldo_topup')
@@ -129,12 +108,9 @@ module.exports = function (app) {
 
   // ✅ History Topup (User)
   app.get('/gateway/history', async (req, res) => {
-    const { username, apikey } = req.query;
-    if (!username || !apikey)
+    const { username } = req.query;
+    if (!username)
       return res.status(400).json({ status: false, message: 'username dan apikey wajib diisi' });
-
-    if (!(await validateApikey(apikey)))
-      return res.status(401).json({ status: false, message: 'Apikey tidak valid' });
 
     const { data } = await supabase
       .from('saldo_topup')
@@ -158,12 +134,9 @@ module.exports = function (app) {
 
   // ✅ Withdraw (24 jam validasi + potong saldo)
   app.get('/gateway/withdraw', async (req, res) => {
-    const { username, amount, tujuan, apikey } = req.query;
-    if (!username || !amount || !tujuan || !apikey)
+    const { username, amount, tujuan } = req.query;
+    if (!username || !amount || !tujuan)
       return res.status(400).json({ status: false, message: 'Parameter kosong' });
-
-    if (!(await validateApikey(apikey)))
-      return res.status(401).json({ status: false, message: 'Apikey tidak valid' });
 
     const now = new Date();
     const { data: topups } = await supabase
@@ -237,9 +210,7 @@ module.exports = function (app) {
   app.get('/gateway/admin/history', async (req, res) => {
     const { apikey } = req.query;
     if (!apikey) return res.status(400).json({ status: false, message: 'apikey wajib diisi' });
-    const auth = await validateApikey(apikey);
-    if (!auth) return res.status(403).json({ status: false, message: 'Forbidden' });
-
+    
     const { data } = await supabase
       .from('saldo_topup')
       .select('*')
