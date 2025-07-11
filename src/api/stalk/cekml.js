@@ -341,63 +341,88 @@ async function getMLFirstTopup(userId, zoneId) {
   }
 }
 
+// Fungsi fetch dengan timeout manual
+const fetchWithTimeout = async (url, options = {}, timeout = 10000) => {
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), timeout);
+  options.signal = controller.signal;
+
+  try {
+    const response = await fetch(url, options);
+    clearTimeout(id);
+    return response;
+  } catch (error) {
+    clearTimeout(id);
+    throw error;
+  }
+};
+
 
 module.exports = function (app) {
 
-app.get('/stalk/mlbb-bind', async (req, res) => {
-  const { apikey, userId, zoneId } = req.query;
+  app.get('/stalk/mlbb-bind', async (req, res) => {
+    const { apikey, userId, zoneId } = req.query;
 
-  if (!userId || !zoneId) {
-      return res.status(400).json({ status: false, message: 'Parameter userId dan zoneId harus diisi.' });
-    }
-
-  // 🔐 Validasi apikey di Supabase
-  const now = new Date().toISOString();  
-  const { data, error } = await supabase
-    .from('apikeys')
-    .select('token')
-    .eq('token', apikey)
-    .gt('expired_at', now)
-    .single();
-
-  if (error || !data) {
-    return res.status(401).json({ status: false, message: 'Apikey tidak ditemukan atau sudah expired' });
-  }
-
-  try {
-    const apiUrl = `https://api.arbakti.monster/api/validasi/mlbb/bind?userId=${userId}&serverId=${zoneId}&apikey=ARBAKTI`;
-    const response = await fetch(apiUrl);
-    const result = await response.json();
-
-    if (!result?.status) {
-      return res.status(404).json({
+    if (!userId || !zoneId) {
+      return res.status(400).json({
         status: false,
-        message: result?.message || 'Data tidak ditemukan.'
+        message: 'Parameter userId dan zoneId harus diisi.',
       });
     }
 
-    const data = result.data;
+    // 🔐 Validasi API key via Supabase
+    const now = new Date().toISOString();
+    const { data, error } = await supabase
+      .from('apikeys')
+      .select('token')
+      .eq('token', apikey)
+      .gt('expired_at', now)
+      .single();
 
-    return res.status(200).json({
-      status: true,
-      nickname: data.nickname,
-      userId: data.playerId,
-      serverId: data.serverId,
-      region: data.region,
-      binding: data.binding,
-      device: data.device
-    });
+    if (error || !data) {
+      return res.status(401).json({
+        status: false,
+        message: 'Apikey tidak ditemukan atau sudah expired.',
+      });
+    }
 
-  } catch (err) {
-    console.error('Gagal mengambil data MLBB:', err);
-    return res.status(500).json({
-      status: false,
-      message: 'Terjadi kesalahan server.',
-      error: err.message
-    });
-  }
-});
-  
+    try {
+      const apiUrl = `https://api.arbakti.monster/api/validasi/mlbb/bind?userId=${userId}&serverId=${zoneId}&apikey=ARBAKTI`;
+
+      const response = await fetchWithTimeout(apiUrl, {}, 10000); // timeout 10 detik
+      const result = await response.json();
+
+      if (!result?.status) {
+        return res.status(404).json({
+          status: false,
+          message: result?.message || 'Data tidak ditemukan.',
+        });
+      }
+
+      const data = result.data;
+
+      return res.status(200).json({
+        status: true,
+        nickname: data.nickname,
+        userId: data.playerId,
+        serverId: data.serverId,
+        region: data.region,
+        binding: data.binding,
+        device: data.device,
+      });
+    } catch (err) {
+      console.error('Gagal mengambil data MLBB:', err);
+      return res.status(500).json({
+        status: false,
+        message:
+          err.name === 'AbortError'
+            ? 'Permintaan ke server terlalu lama, silakan coba lagi nanti.'
+            : 'Terjadi kesalahan server.',
+        error: err.message,
+      });
+    }
+  });
+
   app.get('/stalk/mlbb-first', async (req, res) => {
     const { apikey, userId, zoneId } = req.query;
 
