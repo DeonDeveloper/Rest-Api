@@ -82,19 +82,19 @@
         {
           "name": "Create Payment",
           "desc": "Create qris payment", 
-          "path": "/gateway/createpayment?apikey=&username=&amount=", 
+          "path": "/gateway/createpayment?username=&amount=", 
           "innerDesc": "Buy apikey >> wa.me/6285784856257"
         },
         {
           "name": "Cek Status Payment",
           "desc": "Cek status payment", 
-          "path": "/gateway/paymentstatus?apikey=&username=&trx_id=", 
+          "path": "/gateway/paymentstatus?username=&trx_id=", 
           "innerDesc": "Buy apikey >> wa.me/6285784856257"          
         }, 
         {
           "name": "Withdraw Payment",
           "desc": "Withdraw payment", 
-          "path": "/gateway/withdraw?apikey=&username=&amount=&tujuan=", 
+          "path": "/gateway/withdraw?username=&amount=&tujuan=", 
           "innerDesc": "Buy apikey >> wa.me/6285784856257"          
         }
       ]
