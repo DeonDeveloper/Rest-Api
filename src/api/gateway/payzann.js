@@ -10,12 +10,13 @@ const supabase = createClient(
 );
 
 // ✅ Konstanta ZannPay
-const ZANN_MERCHANT = 'ZNxxxx';
-const ZANN_SECRET = 'RAHASIA';
+const ZANN_MERCHANT = 'ZNPJOX532';
+const ZANN_SECRET = 'Uo1QZTCGSIrhERv8';
+const PIN = '111222'
 
 module.exports = function (app) {
   // 🔐 Buat pembayaran
-  app.get('/zannpay/createpayment', async (req, res) => {
+  app.get('/gateway/createpayment', async (req, res) => {
     const { username, amount, apikey } = req.query;
     if (!username || !amount || !apikey) return res.status(400).json({ status: false, message: 'Parameter kosong' });
 
@@ -50,7 +51,7 @@ module.exports = function (app) {
   });
 
   // ✅ Cek status
-  app.get('/zannpay/paymentstatus', async (req, res) => {
+  app.get('/gateway/paymentstatus', async (req, res) => {
     const { username, trx_id, apikey } = req.query;
     if (!username || !trx_id || !apikey) return res.status(400).json({ status: false, message: 'Parameter kosong' });
 
@@ -83,9 +84,9 @@ module.exports = function (app) {
   });
 
   // 💸 Penarikan
-  app.get('/zannpay/withdraw', async (req, res) => {
-    const { username, amount, tujuan, pin, apikey } = req.query;
-    if (!username || !amount || !tujuan || !pin || !apikey) return res.status(400).json({ status: false, message: 'Parameter kosong' });
+  app.get('/gateway/withdraw', async (req, res) => {
+    const { username, amount, tujuan, apikey } = req.query;
+    if (!username || !amount || !tujuan || !apikey) return res.status(400).json({ status: false, message: 'Parameter kosong' });
 
     const now = new Date().toISOString();
     const { data, error } = await supabase.from('apikeys').select('*').eq('token', apikey).gt('expired_at', now).single();
@@ -99,7 +100,7 @@ module.exports = function (app) {
     try {
       const { data: wdRes } = await axios.post('http://pay.zannstore.com/v1/', new URLSearchParams({
         merchant: ZANN_MERCHANT,
-        pin,
+        pin: PIN,
         request: 'withdraw',
         amount,
         tujuan,
