@@ -15,61 +15,71 @@ const ZANN_SECRET = 'Uo1QZTCGSIrhERv8';
 const PIN = '111222';
 
 module.exports = function (app) {
-    // ✅ Buat Pembayaran QRIS
-  app.get('/gateway/createpayment', async (req, res) => {
+  // ✅ Buat Pembayaran QRIS
+app.get('/gateway/createpayment', async (req, res) => {
   const { username, amount } = req.query;
   if (!username || !amount)
     return res.status(400).json({ status: false, message: 'Parameter kosong' });
 
-  // 🧹 Hapus transaksi Pending > 5 menit
-  const { data: pendings } = await supabase
-    .from('saldo_topup')
-    .select('id, created_at')
-    .eq('username', username)
-    .eq('status', 'Pending');
-
-  const now = new Date();
-  const expiredIds = [];
-
-  for (const pending of pendings) {
-    const createdTime = new Date(pending.created_at);
-    const ageInMinutes = (now - createdTime) / (1000 * 60);
-    if (ageInMinutes >= 5) expiredIds.push(pending.id);
-  }
-
-  if (expiredIds.length > 0) {
+  try {
+    // 🔄 Hapus tagihan PENDING sebelumnya milik user ini (jika ada)
     await supabase
       .from('saldo_topup')
       .delete()
-      .in('id', expiredIds);
-  }
+      .eq('username', username)
+      .eq('status', 'Pending');
 
-  // 🧾 Lanjut buat QR baru
-  const trx_id = `TRX-${Date.now()}-${Math.floor(Math.random() * 9999)}`;
-  const signature = crypto.createHash('sha256').update(ZANN_MERCHANT + ZANN_SECRET + trx_id).digest('hex');
+    // 🔧 Buat trx_id & signature baru
+    const trx_id = `TRX-${Date.now()}-${Math.floor(Math.random() * 9999)}`;
+    const signature = crypto
+      .createHash('sha256')
+      .update(ZANN_MERCHANT + ZANN_SECRET + trx_id)
+      .digest('hex');
 
-  try {
-    const { data: result } = await axios.post('http://pay.zannstore.com/v1/', new URLSearchParams({
-      merchant: ZANN_MERCHANT,
+    // 🔗 Request ke API ZannPay
+    const { data: result } = await axios.post(
+      'http://pay.zannstore.com/v1/',
+      new URLSearchParams({
+        merchant: ZANN_MERCHANT,
+        trx_id,
+        request: 'new',
+        payment: 'qris',
+        amount,
+        note: `Topup by ${username}`,
+        expired_time: '5m',
+        type_fee: 'user',
+        signature
+      }),
+      {
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+      }
+    );
+
+    if (!result.status)
+      return res.status(400).json({ status: false, message: result.message });
+
+    // 💾 Simpan tagihan baru
+    await supabase.from('saldo_topup').insert({
+      username,
       trx_id,
-      request: 'new',
-      payment: 'qris',
       amount,
-      note: `Topup by ${username}`,
-      expired_time: '5m',
-      type_fee: 'user',
-      signature
-    }), { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } });
+      status: 'Pending'
+    });
 
-    if (!result.status) return res.status(400).json({ status: false, message: result.message });
-
-    await supabase.from('saldo_topup').insert({ username, trx_id, amount, status: 'Pending' });
-
-    res.json({ status: true, message: 'Tagihan dibuat', expired: 'Expired 5 menit', trx_id, qr_url: result.data.qr_url });
+    // ✅ Respon QRIS
+    res.json({
+      status: true,
+      message: 'Tagihan dibuat',
+      expired: 'Expired 5 menit', 
+      trx_id,
+      qr_url: result.data.qr_url
+    });
   } catch (e) {
+    console.error(e);
     res.status(500).json({ status: false, message: 'Gagal membuat tagihan', error: e.message });
   }
 });
+
 
 
   // ✅ Cek Status Pembayaran
