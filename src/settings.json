@@ -36,48 +36,9 @@
         }
       ]
     },
-    {
-      "name": "Orderkuota Gateway",
-      "items": [
-        {
-          "name": "Create Payment",
-          "desc": "Create qris payment", 
-          "path": "/orderkuota/createpayment?apikey=&amount=&codeqr=", 
-          "innerDesc": "Buy apikey >> wa.me/6285784856257"
-        },
-        {
-          "name": "Cek Status",
-          "desc": "Cek status payment", 
-          "path": "/orderkuota/cekstatus?apikey=&merchant=", 
-          "innerDesc": "Buy apikey >> wa.me/6285784856257"          
-        }
-      ]
-    }, 
-    {
-      "name": "Orderkuota V2 Gateway",
-      "items": [
-        {
-          "name": "Login Payment",
-          "desc": "Login orkut payment", 
-          "path": "/orderkuotav2/login?apikey=&username=&password=", 
-          "innerDesc": "Buy apikey >> wa.me/6285784856257"
-        },
-        {
-          "name": "Cek OTP Verification",
-          "desc": "Cek OTP Verification", 
-          "path": "/orderkuotav2/otp?apikey=&username=&otp=", 
-          "innerDesc": "Buy apikey >> wa.me/6285784856257"          
-        }, 
-        {
-          "name": "Cek Mutasi",
-          "desc": "Cek Mutasi", 
-          "path": "/orderkuotav2/mutasi?apikey=&username=", 
-          "innerDesc": "Buy apikey >> wa.me/6285784856257"          
-        }
-      ]
-    },
-    {
+   {
       "name": "Payment Gateway",
+      "desc": "Payment gateway dengan fee 0,7%"
       "items": [
         {
           "name": "Create Payment",
@@ -95,6 +56,12 @@
           "name": "Cek Saldo",
           "desc": "Cek saldo", 
           "path": "/gateway/ceksaldo?username=", 
+          "innerDesc": "Buy apikey >> wa.me/6285784856257"          
+        }, 
+        {
+          "name": "Cek Histori",
+          "desc": "Cek histori", 
+          "path": "/gateway/histori?username=", 
           "innerDesc": "Buy apikey >> wa.me/6285784856257"          
         }, 
         {
