@@ -77,6 +77,29 @@
       ]
     },
     {
+      "name": "Payment Gateway",
+      "items": [
+        {
+          "name": "Create Payment",
+          "desc": "Create qris payment", 
+          "path": "/gateway/createpayment?apikey=&username=&amount=", 
+          "innerDesc": "Buy apikey >> wa.me/6285784856257"
+        },
+        {
+          "name": "Cek Status Payment",
+          "desc": "Cek status payment", 
+          "path": "/gateway/paymentstatus?apikey=&username=&trx_id=", 
+          "innerDesc": "Buy apikey >> wa.me/6285784856257"          
+        }, 
+        {
+          "name": "Withdraw Payment",
+          "desc": "Withdraw payment", 
+          "path": "/gateway/withdraw?apikey=&username=&amount=&tujuan=", 
+          "innerDesc": "Buy apikey >> wa.me/6285784856257"          
+        }
+      ]
+    },
+    {
       "name": "Downloader",
       "items": [
         {
