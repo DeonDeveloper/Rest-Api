@@ -6,23 +6,35 @@ const { createClient } = require('@supabase/supabase-js');
 // ✅ Inisialisasi Supabase
 const supabase = createClient(
   'https://yohjdlqqeoxvsmhadoqn.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlvaGpkbHFxZW94dnNtaGFkb3FuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTIwMzU3NDAsImV4cCI6MjA2NzYxMTc0MH0.eH4cOXY1w58xPrcq8IP4AyU5P3RArAZ_SXd023DsIog'
+  'YOUR_SUPABASE_API_KEY'
 );
 
 // ✅ Konstanta ZannPay
 const ZANN_MERCHANT = 'ZNPJOX532';
 const ZANN_SECRET = 'Uo1QZTCGSIrhERv8';
-const PIN = '111222'
+const PIN = '111222';
 
 module.exports = function (app) {
-  // 🔐 Buat pembayaran
+  // 🔐 Validasi API Key
+  async function validateApikey(apikey) {
+    const now = new Date().toISOString();
+    const { data, error } = await supabase
+      .from('apikeys')
+      .select('*')
+      .eq('token', apikey)
+      .gt('expired_at', now)
+      .single();
+    return !error && data;
+  }
+
+  // ✅ Buat Pembayaran QRIS
   app.get('/gateway/createpayment', async (req, res) => {
     const { username, amount, apikey } = req.query;
-    if (!username || !amount || !apikey) return res.status(400).json({ status: false, message: 'Parameter kosong' });
+    if (!username || !amount || !apikey)
+      return res.status(400).json({ status: false, message: 'Parameter kosong' });
 
-    const now = new Date().toISOString();
-    const { data, error } = await supabase.from('apikeys').select('*').eq('token', apikey).gt('expired_at', now).single();
-    if (error || !data) return res.status(401).json({ status: false, message: 'Apikey tidak valid/expired' });
+    if (!(await validateApikey(apikey)))
+      return res.status(401).json({ status: false, message: 'Apikey tidak valid/expired' });
 
     const trx_id = `TRX-${Date.now()}-${Math.floor(Math.random() * 9999)}`;
     const signature = crypto.createHash('sha256').update(ZANN_MERCHANT + ZANN_SECRET + trx_id).digest('hex');
@@ -50,14 +62,14 @@ module.exports = function (app) {
     }
   });
 
-  // ✅ Cek status
+  // ✅ Cek Status Pembayaran
   app.get('/gateway/paymentstatus', async (req, res) => {
     const { username, trx_id, apikey } = req.query;
-    if (!username || !trx_id || !apikey) return res.status(400).json({ status: false, message: 'Parameter kosong' });
+    if (!username || !trx_id || !apikey)
+      return res.status(400).json({ status: false, message: 'Parameter kosong' });
 
-    const now = new Date().toISOString();
-    const { data, error } = await supabase.from('apikeys').select('*').eq('token', apikey).gt('expired_at', now).single();
-    if (error || !data) return res.status(401).json({ status: false, message: 'Apikey tidak valid' });
+    if (!(await validateApikey(apikey)))
+      return res.status(401).json({ status: false, message: 'Apikey tidak valid' });
 
     const signature = crypto.createHash('sha256').update(ZANN_MERCHANT + ZANN_SECRET + trx_id).digest('hex');
 
@@ -69,33 +81,122 @@ module.exports = function (app) {
         signature
       }), { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } });
 
-      if (statusRes.data.status !== 'Success') return res.json({ status: false, message: 'Belum dibayar' });
+      if (statusRes.data.status !== 'Success')
+        return res.json({ status: false, message: 'Belum dibayar' });
 
-      const { data: userData } = await supabase.from('users').select('*').eq('username', username).single();
-      const saldoNow = userData?.saldo || 0;
-
-      await supabase.from('users').upsert({ username, saldo: saldoNow + parseInt(statusRes.data.amount) });
       await supabase.from('saldo_topup').update({ status: 'Success' }).eq('trx_id', trx_id);
 
-      res.json({ status: true, message: 'Pembayaran sukses & saldo ditambahkan' });
+      res.json({ status: true, message: 'Pembayaran sukses. Saldo akan tersedia dalam 24 jam.' });
     } catch (e) {
       res.status(500).json({ status: false, message: 'Gagal cek status', error: e.message });
     }
   });
 
-  // 💸 Penarikan
+  // ✅ Cek Saldo
+  app.get('/gateway/ceksaldo', async (req, res) => {
+    const { username, apikey } = req.query;
+    if (!username || !apikey)
+      return res.status(400).json({ status: false, message: 'username dan apikey wajib diisi' });
+
+    if (!(await validateApikey(apikey)))
+      return res.status(401).json({ status: false, message: 'Apikey tidak valid' });
+
+    const now = new Date();
+    const { data: topups } = await supabase
+      .from('saldo_topup')
+      .select('amount, used, created_at')
+      .eq('username', username)
+      .eq('status', 'Success');
+
+    let saldoTersedia = 0;
+    let saldoTertahan = 0;
+
+    for (const topup of topups) {
+      const umurJam = (now - new Date(topup.created_at)) / (1000 * 60 * 60);
+      const sisa = topup.amount - (topup.used || 0);
+      if (sisa <= 0) continue;
+      if (umurJam >= 24) saldoTersedia += sisa;
+      else saldoTertahan += sisa;
+    }
+
+    res.json({
+      status: true,
+      username,
+      saldo_tersedia: saldoTersedia,
+      saldo_tertahan: saldoTertahan
+    });
+  });
+
+  // ✅ History Topup (User)
+  app.get('/gateway/history', async (req, res) => {
+    const { username, apikey } = req.query;
+    if (!username || !apikey)
+      return res.status(400).json({ status: false, message: 'username dan apikey wajib diisi' });
+
+    if (!(await validateApikey(apikey)))
+      return res.status(401).json({ status: false, message: 'Apikey tidak valid' });
+
+    const { data } = await supabase
+      .from('saldo_topup')
+      .select('trx_id, amount, status, used, created_at')
+      .eq('username', username)
+      .order('created_at', { ascending: false });
+
+    res.json({
+      status: true,
+      username,
+      history: data.map(item => ({
+        trx_id: item.trx_id,
+        amount: item.amount,
+        used: item.used || 0,
+        sisa: item.amount - (item.used || 0),
+        status: item.status,
+        created_at: item.created_at
+      }))
+    });
+  });
+
+  // ✅ Withdraw (24 jam validasi + potong saldo)
   app.get('/gateway/withdraw', async (req, res) => {
     const { username, amount, tujuan, apikey } = req.query;
-    if (!username || !amount || !tujuan || !apikey) return res.status(400).json({ status: false, message: 'Parameter kosong' });
+    if (!username || !amount || !tujuan || !apikey)
+      return res.status(400).json({ status: false, message: 'Parameter kosong' });
 
-    const now = new Date().toISOString();
-    const { data, error } = await supabase.from('apikeys').select('*').eq('token', apikey).gt('expired_at', now).single();
-    if (error || !data) return res.status(401).json({ status: false, message: 'Apikey tidak valid' });
+    if (!(await validateApikey(apikey)))
+      return res.status(401).json({ status: false, message: 'Apikey tidak valid' });
 
-    const { data: userData } = await supabase.from('users').select('*').eq('username', username).single();
-    if (!userData || (userData.saldo || 0) < parseInt(amount)) return res.status(400).json({ status: false, message: 'Saldo tidak cukup' });
+    const now = new Date();
+    const { data: topups } = await supabase
+      .from('saldo_topup')
+      .select('id, amount, used, created_at')
+      .eq('username', username)
+      .eq('status', 'Success');
 
-    const signature = crypto.createHash('sha256').update(ZANN_MERCHANT + pin).digest('hex');
+    let sisa = parseInt(amount);
+    const updates = [];
+
+    for (const topup of topups) {
+      const umurJam = (now - new Date(topup.created_at)) / (1000 * 60 * 60);
+      const available = (topup.amount - (topup.used || 0));
+      if (umurJam >= 24 && available > 0) {
+        const pakai = Math.min(available, sisa);
+        updates.push({ id: topup.id, pakai });
+        sisa -= pakai;
+        if (sisa <= 0) break;
+      }
+    }
+
+    if (sisa > 0) return res.status(400).json({ status: false, message: 'Saldo tidak cukup' });
+
+    // Update used saldo
+    for (const u of updates) {
+      await supabase
+        .from('saldo_topup')
+        .update({ used: supabase.raw(`used + ${u.pakai}`) })
+        .eq('id', u.id);
+    }
+
+    const signature = crypto.createHash('sha256').update(ZANN_MERCHANT + PIN).digest('hex');
 
     try {
       const { data: wdRes } = await axios.post('http://pay.zannstore.com/v1/', new URLSearchParams({
@@ -107,14 +208,43 @@ module.exports = function (app) {
         signature
       }), { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } });
 
-      if (!wdRes.status) return res.status(400).json({ status: false, message: 'Withdraw gagal' });
+      if (!wdRes.status)
+        return res.status(400).json({ status: false, message: 'Withdraw gagal' });
 
-      await supabase.from('users').update({ saldo: userData.saldo - parseInt(amount) }).eq('username', username);
-      await supabase.from('withdraw_log').insert({ username, amount, tujuan, trx_id: wdRes.trx_id });
+      await supabase.from('withdraw_log').insert({
+        username,
+        amount: parseInt(amount),
+        tujuan,
+        trx_id: wdRes.trx_id
+      });
 
-      res.json({ status: true, message: 'Withdraw berhasil diproses', trx_id: wdRes.trx_id });
+      res.json({ status: true, message: 'Withdraw berhasil', trx_id: wdRes.trx_id });
     } catch (e) {
       res.status(500).json({ status: false, message: 'Withdraw error', error: e.message });
     }
+  });
+
+  // ✅ Webhook (optional, jika Zann mendukung notifikasi ke URL kamu)
+  app.post('/gateway/webhook', async (req, res) => {
+    const { trx_id, status } = req.body;
+    if (trx_id && status === 'Success') {
+      await supabase.from('saldo_topup').update({ status: 'Success' }).eq('trx_id', trx_id);
+    }
+    res.json({ status: true });
+  });
+
+  // ✅ Admin: semua history
+  app.get('/gateway/admin/history', async (req, res) => {
+    const { apikey } = req.query;
+    if (!apikey) return res.status(400).json({ status: false, message: 'apikey wajib diisi' });
+    const auth = await validateApikey(apikey);
+    if (!auth) return res.status(403).json({ status: false, message: 'Forbidden' });
+
+    const { data } = await supabase
+      .from('saldo_topup')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    res.json({ status: true, data });
   });
 };
