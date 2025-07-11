@@ -372,7 +372,7 @@ module.exports = function (app) {
       const apiUrl = `https://api.arbakti.monster/api/validasi/mlbb/bind?userId=${userId}&serverId=${zoneId}&apikey=ARBAKTI`;
       
       // Gunakan axios dengan timeout 10 detik
-      const { data: result } = await axios.get(apiUrl, { timeout: 10000 });
+      const { data: result } = await axios.get(apiUrl, { timeout: 50000 });
 
       if (!result?.status) {
         return res.status(404).json({
