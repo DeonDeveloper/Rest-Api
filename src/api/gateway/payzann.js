@@ -168,69 +168,82 @@ app.get('/gateway/createpayment', async (req, res) => {
   });
 
   // ✅ Withdraw (24 jam validasi + potong saldo)
-  app.get('/gateway/withdraw', async (req, res) => {
-    const { username, amount, tujuan } = req.query;
-    if (!username || !amount || !tujuan)
-      return res.status(400).json({ status: false, message: 'Parameter kosong' });
+  // ✅ Withdraw Otomatis (ZannStore)
+app.get('/gateway/withdraw', async (req, res) => {
+  const { username, amount, tujuan, type_bank, bank_code } = req.query;
 
-    const now = new Date();
-    const { data: topups } = await supabase
+  if (!username || !amount || !tujuan || !type_bank || !bank_code)
+    return res.status(400).json({ status: false, message: 'Parameter tidak lengkap' });
+
+  if (parseInt(amount) < 15000)
+    return res.status(400).json({ status: false, message: 'Minimal withdraw Rp15.000' });
+
+  const now = new Date();
+  const { data: topups } = await supabase
+    .from('saldo_topup')
+    .select('id, amount, used, created_at')
+    .eq('username', username)
+    .eq('status', 'Success');
+
+  let sisa = parseInt(amount);
+  const updates = [];
+
+  for (const topup of topups) {
+    const umurJam = (now - new Date(topup.created_at)) / (1000 * 60 * 60);
+    const available = (topup.amount - (topup.used || 0));
+    if (umurJam >= 24 && available > 0) {
+      const pakai = Math.min(available, sisa);
+      updates.push({ id: topup.id, pakai });
+      sisa -= pakai;
+      if (sisa <= 0) break;
+    }
+  }
+
+  if (sisa > 0) return res.status(400).json({ status: false, message: 'Saldo tidak cukup atau masih dikunci < 24 jam' });
+
+  // Update saldo dipakai
+  for (const u of updates) {
+    await supabase
       .from('saldo_topup')
-      .select('id, amount, used, created_at')
-      .eq('username', username)
-      .eq('status', 'Success');
+      .update({ used: supabase.raw(`used + ${u.pakai}`) })
+      .eq('id', u.id);
+  }
 
-    let sisa = parseInt(amount);
-    const updates = [];
+  // Signature SHA256
+  const signature = crypto.createHash('sha256').update(ZANN_MERCHANT + PIN).digest('hex');
 
-    for (const topup of topups) {
-      const umurJam = (now - new Date(topup.created_at)) / (1000 * 60 * 60);
-      const available = (topup.amount - (topup.used || 0));
-      if (umurJam >= 24 && available > 0) {
-        const pakai = Math.min(available, sisa);
-        updates.push({ id: topup.id, pakai });
-        sisa -= pakai;
-        if (sisa <= 0) break;
-      }
+  try {
+    const { data: wdRes } = await axios.post('https://pay.zannstore.com/v1/', new URLSearchParams({
+      merchant: ZANN_MERCHANT,
+      pin: PIN,
+      request: 'withdraw_auto',
+      amount,
+      type_bank,
+      bank_code,
+      tujuan,
+      signature
+    }), {
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+    });
+
+    if (!wdRes.status) {
+      return res.status(400).json({ status: false, message: wdRes.msg || 'Withdraw gagal' });
     }
 
-    if (sisa > 0) return res.status(400).json({ status: false, message: 'Saldo tidak cukup' });
+    await supabase.from('withdraw_log').insert({
+      username,
+      amount: parseInt(amount),
+      tujuan,
+      type_bank,
+      bank_code,
+      trx_id: wdRes.trx_id
+    });
 
-    // Update used saldo
-    for (const u of updates) {
-      await supabase
-        .from('saldo_topup')
-        .update({ used: supabase.raw(`used + ${u.pakai}`) })
-        .eq('id', u.id);
-    }
-
-    const signature = crypto.createHash('sha256').update(ZANN_MERCHANT + PIN).digest('hex');
-
-    try {
-      const { data: wdRes } = await axios.post('http://pay.zannstore.com/v1/', new URLSearchParams({
-        merchant: ZANN_MERCHANT,
-        pin: PIN,
-        request: 'withdraw',
-        amount,
-        tujuan,
-        signature
-      }), { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } });
-
-      if (!wdRes.status)
-        return res.status(400).json({ status: false, message: 'Withdraw gagal' });
-
-      await supabase.from('withdraw_log').insert({
-        username,
-        amount: parseInt(amount),
-        tujuan,
-        trx_id: wdRes.trx_id
-      });
-
-      res.json({ status: true, message: 'Withdraw berhasil', trx_id: wdRes.trx_id });
-    } catch (e) {
-      res.status(500).json({ status: false, message: 'Withdraw error', error: e.message });
-    }
-  });
+    res.json({ status: true, message: wdRes.msg, trx_id: wdRes.trx_id });
+  } catch (e) {
+    res.status(500).json({ status: false, message: 'Withdraw error', error: e.message });
+  }
+});
 
   // ✅ Webhook (optional, jika Zann mendukung notifikasi ke URL kamu)
   app.post('/gateway/webhook', async (req, res) => {
